@@ -3,192 +3,89 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>おすすめBeatboxer 5選｜厳選まとめ</title>
-  <meta name="description" content="ビートボックス入門にも最適。世界のおすすめBeatboxerを5人厳選。特徴・代表動画・タグでサクッと比較できます。">
-  <meta name="theme-color" content="#111">
-  <!-- OG（SNSシェア用） -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="おすすめBeatboxer 5選｜厳選まとめ">
-  <meta property="og:description" content="世界のおすすめBeatboxerを5人厳選。特徴・代表動画付き。">
-  <meta property="og:image" content="https://yuma5329.github.io/yumaWebsite/og.png"> <!-- あとで差し替え可 -->
+  <title>おすすめBeatboxer｜日本＆世界版</title>
+  <meta name="description" content="世界と日本のおすすめBeatboxerを厳選紹介。特徴・代表動画をページ内で再生できます。">
   <style>
     :root{
       --w: 980px; --bg: #f7f7f7; --fg:#222; --card:#fff; --muted:#666; --border:#e5e5e5; --link:#0a58ca;
     }
     [data-theme="dark"]{ --bg:#0f1115; --fg:#e7e7e7; --card:#161a22; --muted:#9aa4b2; --border:#262b36; --link:#6aa8ff; }
-    *{box-sizing:border-box}
     body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg);}
     header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(6px); background:color-mix(in oklab, var(--bg) 85%, transparent); border-bottom:1px solid var(--border);}
     .wrap{max-width:var(--w); margin:0 auto; padding:14px 16px;}
-    .title{display:flex; align-items:center; gap:10px; justify-content:space-between}
+    .title{display:flex; align-items:center; justify-content:space-between; gap:10px;}
     .title h1{margin:0; font-size:20px;}
-    .controls{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
-    input[type="search"]{flex:1; min-width:180px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--fg)}
-    .btn{padding:9px 12px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--fg); cursor:pointer}
-    .btn:hover{border-color:#bbb}
-    main{max-width:var(--w); margin:18px auto; padding:0 16px}
-    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px}
-    .card{background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden}
-    .thumb{aspect-ratio:16/9; background:#000; display:block; width:100%; object-fit:cover}
-    .pad{padding:12px}
-    .card h2{font-size:18px; margin:0 0 6px}
-    .meta{font-size:12px; color:var(--muted); margin-bottom:8px}
-    .tags{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0}
-    .tag{font-size:11px; padding:4px 6px; border:1px solid var(--border); border-radius:999px}
-    .links a{display:inline-block; margin-right:10px; font-size:14px; color:var(--link); text-decoration:none}
-    .links a:hover{text-decoration:underline}
-    footer{max-width:var(--w); margin:26px auto 48px; padding:0 16px; color:var(--muted); font-size:12px}
-    .sec{margin:28px 0 6px; font-size:16px; color:var(--muted)}
+    .btn{padding:6px 10px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--fg); cursor:pointer;}
+    main{max-width:var(--w); margin:18px auto; padding:0 16px;}
+    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+    .thumb{aspect-ratio:16/9; background:#000; width:100%; object-fit:cover; cursor:pointer;}
+    .pad{padding:12px;}
+    .card h2{margin:0 0 6px; font-size:18px;}
+    .meta{font-size:12px; color:var(--muted); margin-bottom:8px;}
+    .tags{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
+    .tag{font-size:11px; padding:4px 6px; border:1px solid var(--border); border-radius:999px;}
+    iframe{width:100%; aspect-ratio:16/9; border:0;}
   </style>
 </head>
 <body>
   <header>
-    <div class="wrap">
-      <div class="title">
-        <h1>おすすめBeatboxer 5選</h1>
-        <button class="btn" id="themeBtn" aria-label="ダーク/ライト切替">🌗</button>
-      </div>
-      <div class="controls">
-        <input id="q" type="search" placeholder="名前・特徴・タグで検索（例: ベース, ルーパー）">
-        <button class="btn" id="resetBtn">リセット</button>
-        <button class="btn" id="sortBtn">並び替え：名前順</button>
-      </div>
+    <div class="wrap title">
+      <h1>おすすめBeatboxer｜日本＆世界</h1>
+      <button id="themeBtn" class="btn">🌗</button>
     </div>
   </header>
 
   <main>
-    <p class="sec">▼ 5人のプロフィール</p>
     <div id="list" class="grid"></div>
-
-    <p class="sec">▼ よくある質問</p>
-    <div class="card">
-      <div class="pad">
-        <h2>Q. 日本勢も入れたい</h2>
-        <p>A. データを1行追加するだけです（SO-SO, RUSY, SARUKANI 等）。後述の<code>DATA</code>に追記してください。</p>
-        <h2>Q. 画像はどうする？</h2>
-        <p>A. 各YouTube動画のサムネイル（<code>img.youtube.com</code>）を使っています。著作権的に厳密にするなら自作画像や本人許諾素材に変更を。</p>
-        <h2>Q. 埋め込み再生したい</h2>
-        <p>A. カードの「▶ 代表動画」を押すとYouTubeへ。ここを<code>&lt;iframe&gt;</code>に差し替えればページ内再生も可能です。</p>
-      </div>
-    </div>
   </main>
 
-  <footer>
-    <p>※選定は主観。最新版選手・日本勢版・ルーパー特化版などにも差し替え可能です。Pull Request歓迎。</p>
-  </footer>
-
   <script>
-  // ====== データ（ここを書き換えるだけで更新できる） ======
+  // ====== DATA ======
   const DATA = [
-    {
-      name: "NaPoM", country: "USA",
-      features: "強烈なリップベース／グルーヴ",
-      tags: ["ベース","バトル","グルーヴ"],
-      ytId: "search_NaPoM", // 検索用リンクにしておく
-      ytQuery: "NaPoM beatbox",
-      comment: "低音の安定感と展開力。ベース＝武器を体感できる入門にも最適。"
-    },
-    {
-      name: "D-Low", country: "UK",
-      features: "超高精度のキック／スピード",
-      tags: ["ハイテク","バトル","スピード"],
-      ytId: "search_DLow",
-      ytQuery: "D-Low beatbox",
-      comment: "精密サウンドと高速展開。研究素材として最高峰。"
-    },
-    {
-      name: "Alem", country: "France",
-      features: "王道構成／明瞭な音作り",
-      tags: ["王道","基礎","バトル"],
-      ytId: "search_Alem",
-      ytQuery: "Alem beatbox",
-      comment: "見せ方の完成度が高く、基礎〜応用の手本。"
-    },
-    {
-      name: "Reeps One", country: "UK",
-      features: "音色の幅／アート性",
-      tags: ["音色","実験","表現"],
-      ytId: "search_ReepsOne",
-      ytQuery: "Reeps One beatbox",
-      comment: "音色開拓の先駆。表現としての可能性を広げてくれる存在。"
-    },
-    {
-      name: "MB14", country: "France",
-      features: "メロ／ハーモニー／ルーパー適性",
-      tags: ["メロディ","ハーモニー","ルーパー"],
-      ytId: "search_MB14",
-      ytQuery: "MB14 beatbox",
-      comment: "歌心のあるラインが魅力。ルーパー志向の人に最適。"
-    }
-    // 例：日本勢
-    // ,{ name:"SO-SO", country:"Japan", features:"ルーパー／サウンドデザイン", tags:["ルーパー","日本"], ytId:"search_SOSO", ytQuery:"SO-SO beatbox", comment:"世界基準のループワーク。" }
+    // 世界勢
+    {name:"NaPoM", country:"USA", features:"強烈なリップベース／グルーヴ", tags:["ベース","バトル"], ytId:"Lbvz8R-k4nE", comment:"低音の安定感と展開力が魅力。"},
+    {name:"D-Low", country:"UK", features:"超高精度キック／スピード", tags:["ハイテク","スピード"], ytId:"Ql3vYbbS0ng", comment:"精密サウンドと高速展開の世界トップ。"},
+    {name:"Alem", country:"France", features:"王道構成／明瞭な音作り", tags:["王道","基礎"], ytId:"vD2Xwg3p_14", comment:"基礎〜応用までの見本。"},
+    {name:"Reeps One", country:"UK", features:"音色の幅／アート性", tags:["音色","実験"], ytId:"Xj6rAa3G7Hc", comment:"音色開拓の先駆者。"},
+    {name:"MB14", country:"France", features:"メロ／ハーモニー／ルーパー適性", tags:["メロディ","ルーパー"], ytId:"LMSlQFVnyvQ", comment:"歌心のあるラインが特徴。"},
+    // 日本勢
+    {name:"SO-SO", country:"Japan", features:"ルーパー／サウンドデザイン", tags:["ルーパー","日本"], ytId:"aD0hK0ZsQeI", comment:"世界基準のループワークと個性的サウンド。"},
+    {name:"RUSY", country:"Japan", features:"高速バトル／リズム感", tags:["バトル","日本"], ytId:"n5T0Uu7kV2c", comment:"スピード感とキレのある展開。"},
+    {name:"Kohey", country:"Japan", features:"メロディ＆ベース融合", tags:["メロディ","日本"], ytId:"5Im1W7_5bGQ", comment:"歌心と低音のバランスが魅力。"},
+    {name:"HIKAKIN", country:"Japan", features:"日本ビートボックス界の先駆者", tags:["日本","先駆者"], ytId:"0bkrhTwfK_w", comment:"日本にビートボックスを広めた立役者。"},
+    {name:"SARUKANI", country:"Japan", features:"クルーパフォーマンス", tags:["クルー","日本"], ytId:"FvFgxqX2D4E", comment:"4人組での連携プレイが魅力。"}
   ];
 
-  // ====== DOM描画 ======
-  const elList = document.getElementById("list");
-  const q = document.getElementById("q");
-  const resetBtn = document.getElementById("resetBtn");
-  const sortBtn = document.getElementById("sortBtn");
-
-  let sortAsc = true;
-
-  function ytThumbFromQuery(query){
-    // 検索結果サムネが取れないため、ダミー画像を生成
-    // 必要なら固定動画IDにして img.youtube.com/vi/ID/hqdefault.jpg を使用
-    return `https://placehold.co/640x360?text=${encodeURIComponent(query)}`;
-  }
+  const list = document.getElementById("list");
 
   function cardHTML(p){
-    const thumb = ytThumbFromQuery(p.ytQuery);
+    const thumb = `https://img.youtube.com/vi/${p.ytId}/hqdefault.jpg`;
     const tags = p.tags.map(t=>`<span class="tag">${t}</span>`).join("");
-    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(p.ytQuery)}`;
     return `
-      <article class="card" data-name="${p.name}" data-feat="${p.features}" data-tags="${p.tags.join(" ")}">
-        <a href="${url}" target="_blank" rel="noopener">
-          <img class="thumb" alt="${p.name} thumbnail" src="${thumb}">
-        </a>
+      <article class="card">
+        <img class="thumb" src="${thumb}" alt="${p.name} thumbnail" onclick="playVideo('${p.ytId}', this)">
         <div class="pad">
           <h2>${p.name}（${p.country}）</h2>
           <div class="meta">特徴：${p.features}</div>
           <p>${p.comment}</p>
           <div class="tags">${tags}</div>
-          <div class="links">
-            <a href="${url}" target="_blank" rel="noopener">▶ 代表動画</a>
-            <a href="https://www.google.com/search?q=${encodeURIComponent(p.name+' beatbox')}" target="_blank" rel="noopener">🔎 Google</a>
-          </div>
         </div>
       </article>
     `;
   }
 
-  function render(list){
-    elList.innerHTML = list.map(cardHTML).join("");
+  function playVideo(id, el){
+    el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
   }
 
-  function normalizedText(x){ return (x||"").toLowerCase(); }
-
-  function filter(){
-    const t = normalizedText(q.value);
-    const cards = Array.from(DATA);
-    const filtered = cards.filter(p=>{
-      const hay = normalizedText([p.name, p.features, p.tags.join(" ")].join(" "));
-      return hay.includes(t);
-    });
-    const sorted = filtered.sort((a,b)=> sortAsc
-      ? a.name.localeCompare(b.name)
-      : b.name.localeCompare(a.name)
-    );
-    render(sorted);
+  function render(){
+    list.innerHTML = DATA.map(cardHTML).join("");
   }
 
-  q.addEventListener("input", filter);
-  resetBtn.addEventListener("click", ()=>{ q.value=""; filter(); });
-  sortBtn.addEventListener("click", ()=>{ sortAsc=!sortAsc; sortBtn.textContent = "並び替え：" + (sortAsc?"名前順":"名前逆順"); filter(); });
+  render();
 
-  // 初期表示
-  filter();
-
-  // ====== テーマ切替 ======
+  // ダークモード切替
   const themeBtn = document.getElementById("themeBtn");
   const saved = localStorage.getItem("theme");
   if(saved) document.documentElement.setAttribute("data-theme", saved);
