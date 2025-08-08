@@ -1,90 +1,151 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Beatboxer図鑑</title>
-  <style>
-    :root{--bg:#f6f6f6;--fg:#222;--card:#fff;--muted:#666;--border:#ddd;--w:980px}
-    [data-theme="dark"]{--bg:#0f1115;--fg:#eee;--card:#1a1d23;--muted:#aaa;--border:#333}
-    body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--fg)}
-    header{padding:18px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10}
-    h1{margin:0;font-size:22px}
-    .wrap{max-width:var(--w);margin:0 auto}
-    .toggle{float:right;font-size:16px;cursor:pointer}
-    main{max-width:var(--w);margin:24px auto;padding:0 16px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-    .thumb,iframe{width:100%;aspect-ratio:16/9;border:0;background:#000;cursor:pointer}
-    .pad{padding:12px}
-    h2{margin:0 0 6px;font-size:18px}
-    .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
-    .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-    .tag{font-size:11px;padding:4px 8px;border:1px solid var(--border);border-radius:999px}
-    footer{padding:24px 16px;color:var(--muted);font-size:13px;text-align:center}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beatboxer図鑑（簡易版）</title>
+<style>
+  :root{--bg:#0f1115;--fg:#e7e7e7;--card:#161a22;--muted:#9aa4b2;--border:#262b36;--w:1080px}
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;background:var(--bg);color:var(--fg)}
+  header{position:sticky;top:0;z-index:10;background:rgba(15,17,21,.7);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+  .wrap{max-width:var(--w);margin:0 auto;padding:12px 16px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  h1{margin:0;font-size:20px}
+  input,select,button{background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+  input[type="url"]{min-width:260px;flex:1}
+  main{max-width:var(--w);margin:18px auto;padding:0 16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .thumb, iframe{width:100%;aspect-ratio:16/9;border:0;background:#000}
+  .thumb{object-fit:cover;display:block;cursor:pointer}
+  .pad{padding:10px}
+  .name{margin:.2em 0 .4em;font-size:16px}
+  .meta{font-size:12px;color:var(--muted)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .tag{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:3px 8px}
+  section{margin:20px 0}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+  .hint{color:var(--muted);font-size:12px;margin-top:6px}
+</style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <h1>Beatboxer図鑑 <span class="toggle" id="themeBtn">🌗</span></h1>
+<header>
+  <div class="wrap">
+    <div class="row">
+      <h1>Beatboxer図鑑</h1>
+      <input id="q" type="search" placeholder="検索（例：Napom, ベース, ルーパー）">
+      <button id="clearBtn">クリア</button>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main>
-    <div class="grid" id="list"></div>
-  </main>
+<main>
+  <!-- キュレーション（手動リスト） -->
+  <section>
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <h2 style="margin:0;font-size:16px;color:var(--muted)">キュレーション（手動登録・クリックで埋め込み）</h2>
+      <div class="hint">※ API不要。動画IDを手入力するだけ。</div>
+    </div>
+    <div id="list" class="grid"></div>
+  </section>
 
-  <footer>
-    © 2025 Beatboxer図鑑. All rights reserved.
-  </footer>
+  <!-- プレイリスト再生（URL貼り付け） -->
+  <section>
+    <div class="panel">
+      <div class="row">
+        <label for="plUrl" class="hint">YouTubeプレイリストURL：</label>
+        <input id="plUrl" type="url" placeholder="https://www.youtube.com/playlist?list=... か、動画URLの &list=... 付き">
+        <button id="loadPl">読み込み</button>
+      </div>
+      <div class="hint">例）Swissbeatbox公式や大会の再生リストURLを貼る → 下のプレイヤーがそのまま再生。</div>
+      <div id="plPlayerWrap" style="margin-top:10px;display:none">
+        <iframe id="plPlayer" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+</main>
 
-  <script>
-    const DATA = [
-      {name:"NaPoM", country:"USA", features:"ベース/グルーヴ", tags:["ベース","バトル"], ytId:"Lbvz8R-k4nE", comment:"低音重視の王道スタイル。"},
-      {name:"D-Low", country:"UK", features:"高速・高精度", tags:["キック","スピード"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成力。"},
-      {name:"Alem", country:"France", features:"王道/構成美", tags:["基礎","構成"], ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。"},
-      {name:"Reeps One", country:"UK", features:"音色表現", tags:["アート","実験"], ytId:"Xj6rAa3G7Hc", comment:"表現の幅を押し広げる存在。"},
-      {name:"MB14", country:"France", features:"ルーパー/メロ", tags:["メロディ","ハーモニー"], ytId:"LMSlQFVnyvQ", comment:"歌心あるスタイル。"},
-      {name:"SO-SO", country:"Japan", features:"ルーパー/個性派", tags:["日本","ループ"], ytId:"aD0hK0ZsQeI", comment:"世界基準の独自路線。"},
-      {name:"RUSY", country:"Japan", features:"高速バトル", tags:["日本","スピード"], ytId:"n5T0Uu7kV2c", comment:"鋭いリズムと迫力。"},
-      {name:"Kohey", country:"Japan", features:"メロ×ベース", tags:["日本","メロ"], ytId:"5Im1W7_5bGQ", comment:"歌と重低音の融合。"},
-      {name:"HIKAKIN", country:"Japan", features:"先駆者", tags:["日本","レジェンド"], ytId:"0bkrhTwfK_w", comment:"国内シーンを切り開いた存在。"},
-      {name:"SARUKANI", country:"Japan", features:"クルースタイル", tags:["日本","チーム"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
-    ];
+<script>
+/** ====== 手動データ（ここを書き換えるだけで更新できる） ======
+ *  サムネは maxresdefault → 404なら自動で hqdefault にフォールバック
+ *  ytId: YouTube の「動画ID」（URLの v=XXXXX や youtu.be/XXXXX の XXXXX 部分）
+ */
+const DATA = [
+  // あなたが指定した2本（埋め込み済）
+  { name:"D-Low",  country:"UK",  features:"高速・高精度", tags:["キック","スピード"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成。" },
+  { name:"NaPoM",  country:"USA", features:"ベース/グルーヴ", tags:["ベース","バトル"],  ytId:"YYKMoZnuTJE", comment:"低音の安定感と展開力。" },
 
-    const list = document.getElementById("list");
+  // 例：あとで増やすときは ytId だけ足せばOK
+  { name:"Alem",   country:"FR",  features:"王道/構成美",   tags:["基礎","構成"],        ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。" },
+  { name:"MB14",   country:"FR",  features:"ルーパー/メロ", tags:["メロディ","ループ"],  ytId:"LMSlQFVnyvQ", comment:"歌心のあるライン。" }
+];
 
-    function cardHTML(p){
-      const thumb = `https://img.youtube.com/vi/${p.ytId}/hqdefault.jpg`;
-      const tags = p.tags.map(t=>`<span class="tag">${t}</span>`).join("");
-      return `
-        <article class="card">
-          <img class="thumb" src="${thumb}" onclick="playVideo('${p.ytId}', this)" alt="${p.name}">
-          <div class="pad">
-            <h2>${p.name}（${p.country}）</h2>
-            <div class="meta">特徴：${p.features}</div>
-            <p>${p.comment}</p>
-            <div class="tags">${tags}</div>
-          </div>
-        </article>`;
-    }
+// ========== 画面生成 ==========
+const elList = document.getElementById("list");
+const q = document.getElementById("q");
+const clearBtn = document.getElementById("clearBtn");
 
-    function render(){ list.innerHTML = DATA.map(cardHTML).join(""); }
-    render();
+function thumbHTML(id, alt){
+  const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+  const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  return `<img class="thumb" src="${max}" onerror="this.onerror=null;this.src='${hq}'" alt="${alt}">`;
+}
 
-    function playVideo(id, el){
-      el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
-    }
+function cardHTML(p){
+  const tags = p.tags.map(t=>`<span class="tag">${t}</span>`).join("");
+  return `
+    <article class="card" data-key="${[p.name,p.country,p.features,p.tags.join(' ')].join(' ').toLowerCase()}">
+      <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
+      <div class="pad">
+        <div class="name">${p.name}（${p.country}）</div>
+        <div class="meta">特徴：${p.features}</div>
+        <div class="tags">${tags}</div>
+        <div class="meta" style="margin-top:6px">${p.comment}</div>
+      </div>
+    </article>
+  `;
+}
 
-    const themeBtn = document.getElementById("themeBtn");
-    const saved = localStorage.getItem("theme");
-    if(saved) document.documentElement.setAttribute("data-theme", saved);
-    themeBtn.onclick = () => {
-      const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("theme", next);
-    };
-  </script>
+function render(list){ elList.innerHTML = list.map(cardHTML).join(""); }
+render(DATA);
+
+// ========== 検索 ==========
+function filter(){
+  const t = (q.value||"").toLowerCase().trim();
+  if(!t){ render(DATA); return; }
+  const f = DATA.filter(p => [p.name,p.country,p.features,p.tags.join(" ")].join(" ").toLowerCase().includes(t));
+  render(f);
+}
+q.addEventListener("input", filter);
+clearBtn.addEventListener("click", ()=>{ q.value=""; filter(); });
+
+// ========== 埋め込み再生（カードクリック） ==========
+function playVideo(id, container){
+  container.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+}
+window.playVideo = playVideo; // インラインonclick用
+
+// ========== プレイリスト埋め込み ==========
+const plUrl = document.getElementById("plUrl");
+const loadPl = document.getElementById("loadPl");
+const plWrap = document.getElementById("plPlayerWrap");
+const plPlayer = document.getElementById("plPlayer");
+
+// URLから list=XXXXX を抜き出す（?list=、&list= どちらでもOK）
+function extractListId(url){
+  try{
+    const u = new URL(url);
+    const list = u.searchParams.get("list");
+    return list || null;
+  }catch{ return null; }
+}
+
+loadPl.addEventListener("click", ()=>{
+  const id = extractListId(plUrl.value.trim());
+  if(!id){ alert("プレイリストURLの ?list= パラメータが見つかりませんでした。"); return; }
+  plPlayer.src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(id)}`;
+  plWrap.style.display = "block";
+});
+</script>
 </body>
 </html>
