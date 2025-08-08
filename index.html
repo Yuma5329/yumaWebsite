@@ -3,68 +3,75 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>おすすめBeatboxer｜日本＆世界版</title>
-  <meta name="description" content="世界と日本のおすすめBeatboxerを厳選紹介。特徴・代表動画をページ内で再生できます。">
+  <title>おすすめBeatboxer｜日本＆世界</title>
+  <meta name="description" content="世界と日本のおすすめBeatboxerを厳選。特徴・代表動画を一覧で。埋め込み再生はIDがあるもののみ。">
   <style>
-    :root{
-      --w: 980px; --bg: #f7f7f7; --fg:#222; --card:#fff; --muted:#666; --border:#e5e5e5; --link:#0a58ca;
-    }
-    [data-theme="dark"]{ --bg:#0f1115; --fg:#e7e7e7; --card:#161a22; --muted:#9aa4b2; --border:#262b36; --link:#6aa8ff; }
-    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg);}
-    header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(6px); background:color-mix(in oklab, var(--bg) 85%, transparent); border-bottom:1px solid var(--border);}
-    .wrap{max-width:var(--w); margin:0 auto; padding:14px 16px;}
-    .title{display:flex; align-items:center; justify-content:space-between; gap:10px;}
-    .title h1{margin:0; font-size:20px;}
-    .btn{padding:6px 10px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--fg); cursor:pointer;}
-    main{max-width:var(--w); margin:18px auto; padding:0 16px;}
-    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;}
-    .card{background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
-    .thumb{aspect-ratio:16/9; background:#000; width:100%; object-fit:cover; cursor:pointer;}
-    .pad{padding:12px;}
-    .card h2{margin:0 0 6px; font-size:18px;}
-    .meta{font-size:12px; color:var(--muted); margin-bottom:8px;}
-    .tags{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
-    .tag{font-size:11px; padding:4px 6px; border:1px solid var(--border); border-radius:999px;}
-    iframe{width:100%; aspect-ratio:16/9; border:0;}
+    :root{--w:980px;--bg:#f7f7f7;--fg:#222;--card:#fff;--muted:#666;--border:#e5e5e5;--link:#0a58ca}
+    [data-theme="dark"]{--bg:#0f1115;--fg:#e7e7e7;--card:#161a22;--muted:#9aa4b2;--border:#262b36;--link:#6aa8ff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    header{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);backdrop-filter:saturate(1.1) blur(6px);background:color-mix(in oklab,var(--bg) 85%,transparent)}
+    .wrap{max-width:var(--w);margin:0 auto;padding:14px 16px;display:flex;gap:10px;justify-content:space-between;align-items:center}
+    h1{margin:0;font-size:20px}
+    .btn{padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--fg);cursor:pointer}
+    main{max-width:var(--w);margin:18px auto;padding:0 16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+    .thumb,iframe{width:100%;aspect-ratio:16/9;border:0;display:block;background:#000}
+    .pad{padding:12px}
+    .card h2{margin:0 0 6px;font-size:18px}
+    .meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+    .tag{font-size:11px;padding:4px 6px;border:1px solid var(--border);border-radius:999px}
+    .muted{color:var(--muted);font-size:12px}
   </style>
 </head>
 <body>
   <header>
-    <div class="wrap title">
+    <div class="wrap">
       <h1>おすすめBeatboxer｜日本＆世界</h1>
-      <button id="themeBtn" class="btn">🌗</button>
+      <button id="themeBtn" class="btn" aria-label="ダーク/ライト切替">🌗</button>
     </div>
   </header>
 
   <main>
+    <p class="muted">※ サムネをタップすると、<b>埋め込み対応のものはページ内再生</b>、それ以外はYouTube検索を開きます。</p>
     <div id="list" class="grid"></div>
   </main>
 
   <script>
-  // ====== DATA ======
+  // ====== データ（ytId があるものだけ埋め込み再生。無ければ検索を開く） ======
   const DATA = [
     // 世界勢
-    {name:"NaPoM", country:"USA", features:"強烈なリップベース／グルーヴ", tags:["ベース","バトル"], ytId:"Lbvz8R-k4nE", comment:"低音の安定感と展開力が魅力。"},
-    {name:"D-Low", country:"UK", features:"超高精度キック／スピード", tags:["ハイテク","スピード"], ytId:"DFk6aVSWo7s", comment:"精密サウンドと高速展開の世界トップ。"},
-    {name:"Alem", country:"France", features:"王道構成／明瞭な音作り", tags:["王道","基礎"], ytId:"vD2Xwg3p_14", comment:"基礎〜応用までの見本。"},
-    {name:"Reeps One", country:"UK", features:"音色の幅／アート性", tags:["音色","実験"], ytId:"Xj6rAa3G7Hc", comment:"音色開拓の先駆者。"},
-    {name:"MB14", country:"France", features:"メロ／ハーモニー／ルーパー適性", tags:["メロディ","ルーパー"], ytId:"LMSlQFVnyvQ", comment:"歌心のあるラインが特徴。"},
+    {name:"NaPoM", country:"USA",    features:"リップベース／グルーヴ",   tags:["ベース","バトル"], ytId:"",            ytQuery:"NaPoM beatbox", comment:"低音の安定感と展開力。"},
+    {name:"D-Low", country:"UK",     features:"高精度キック／スピード",   tags:["ハイテク","スピード"], ytId:"DFk6aVSWo7s", ytQuery:"D-Low beatbox", comment:"あなた指定の代表動画を埋め込み。"},
+    {name:"Alem",  country:"France", features:"王道構成／明瞭な音作り",   tags:["王道","基礎"],       ytId:"",            ytQuery:"Alem beatbox",  comment:"基礎〜応用の見本。"},
+    {name:"Reeps One", country:"UK", features:"音色の幅／アート性",       tags:["音色","実験"],       ytId:"",            ytQuery:"Reeps One beatbox", comment:"表現の可能性を広げる存在。"},
+    {name:"MB14", country:"France",  features:"メロ／ハーモニー／ルーパー", tags:["メロディ","ルーパー"], ytId:"",            ytQuery:"MB14 beatbox", comment:"歌心のあるラインが魅力。"},
     // 日本勢
-    {name:"SO-SO", country:"Japan", features:"ルーパー／サウンドデザイン", tags:["ルーパー","日本"], ytId:"aD0hK0ZsQeI", comment:"世界基準のループワークと個性的サウンド。"},
-    {name:"RUSY", country:"Japan", features:"高速バトル／リズム感", tags:["バトル","日本"], ytId:"n5T0Uu7kV2c", comment:"スピード感とキレのある展開。"},
-    {name:"Kohey", country:"Japan", features:"メロディ＆ベース融合", tags:["メロディ","日本"], ytId:"5Im1W7_5bGQ", comment:"歌心と低音のバランスが魅力。"},
-    {name:"HIKAKIN", country:"Japan", features:"日本ビートボックス界の先駆者", tags:["日本","先駆者"], ytId:"0bkrhTwfK_w", comment:"日本にビートボックスを広めた立役者。"},
-    {name:"SARUKANI", country:"Japan", features:"クルーパフォーマンス", tags:["クルー","日本"], ytId:"FvFgxqX2D4E", comment:"4人組での連携プレイが魅力。"}
+    {name:"SO-SO", country:"Japan",  features:"ルーパー／サウンドデザイン", tags:["ルーパー","日本"], ytId:"", ytQuery:"SO-SO beatbox", comment:"世界基準のループワーク。"},
+    {name:"RUSY",  country:"Japan",  features:"高速バトル／リズム感",       tags:["バトル","日本"],   ytId:"", ytQuery:"RUSY beatbox",  comment:"スピードとキレ。"},
+    {name:"Kohey", country:"Japan",  features:"メロディ＆ベース融合",       tags:["メロディ","日本"], ytId:"", ytQuery:"Kohey beatbox", comment:"歌心と低音のバランス。"},
+    {name:"HIKAKIN", country:"Japan",features:"日本シーンの先駆者",          tags:["日本","先駆者"],   ytId:"", ytQuery:"HIKAKIN beatbox", comment:"日本に広めた立役者。"},
+    {name:"SARUKANI", country:"Japan", features:"クルーパフォーマンス",     tags:["クルー","日本"],   ytId:"", ytQuery:"SARUKANI beatbox", comment:"連携プレイが魅力。"}
   ];
 
   const list = document.getElementById("list");
 
+  function thumbSrc(item){
+    return item.ytId
+      ? `https://img.youtube.com/vi/${item.ytId}/hqdefault.jpg`
+      : `https://placehold.co/640x360?text=${encodeURIComponent(item.name)}`;
+  }
+
   function cardHTML(p){
-    const thumb = `https://img.youtube.com/vi/${p.ytId}/hqdefault.jpg`;
     const tags = p.tags.map(t=>`<span class="tag">${t}</span>`).join("");
+    const click = p.ytId
+      ? `playVideo('${p.ytId}', this)`
+      : `openSearch('${p.ytQuery}')`;
     return `
       <article class="card">
-        <img class="thumb" src="${thumb}" alt="${p.name} thumbnail" onclick="playVideo('${p.ytId}', this)">
+        <img class="thumb" src="${thumbSrc(p)}" alt="${p.name} thumbnail" onclick="${click}">
         <div class="pad">
           <h2>${p.name}（${p.country}）</h2>
           <div class="meta">特徴：${p.features}</div>
@@ -75,17 +82,19 @@
     `;
   }
 
-  function playVideo(id, el){
-    el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-  }
-
-  function render(){
-    list.innerHTML = DATA.map(cardHTML).join("");
-  }
-
+  function render(){ list.innerHTML = DATA.map(cardHTML).join(""); }
   render();
 
-  // ダークモード切替
+  // --- クリック時の処理 ---
+  function playVideo(id, el){
+    el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1"
+                     allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  }
+  function openSearch(q){
+    location.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+  }
+
+  // --- ダーク/ライト切替 ---
   const themeBtn = document.getElementById("themeBtn");
   const saved = localStorage.getItem("theme");
   if(saved) document.documentElement.setAttribute("data-theme", saved);
