@@ -5,109 +5,175 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Beatboxer図鑑</title>
 <style>
-  :root{--bg:#0f1115;--fg:#e7e7e7;--card:#161a22;--muted:#9aa4b2;--border:#262b36;--accent:#6aa8ff}
-  *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
-  .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
-  @media (max-width:920px){ .layout{grid-template-columns:1fr} #sidebar{position:fixed;inset:0 auto 0 0;width:80%;max-width:320px;transform:translateX(-100%);transition:.2s;z-index:30} #sidebar.open{transform:none} .scrim{position:fixed;inset:0;background:#0008;display:none;z-index:20} .scrim.show{display:block}}
-  header{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(15,17,21,.8);backdrop-filter:blur(8px);z-index:10}
-  #menuBtn{display:none}@media (max-width:920px){#menuBtn{display:inline-flex}}
-  #q{flex:1;min-width:200px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--fg)}
-  .btn{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--fg);cursor:pointer}
-  /* sidebar */
-  #sidebar{border-right:1px solid var(--border);background:var(--card);padding:12px;overflow:auto}
-  .secTitle{margin:6px 0 8px;font-size:13px;color:var(--muted)}
-  .nav{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-  .nav button{all:unset;display:block;padding:8px 10px;border:1px solid var(--border);border-radius:10px;cursor:pointer}
-  .nav button.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
-  main{padding:16px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-  .thumb,iframe{width:100%;aspect-ratio:16/9;border:0;background:#000;display:block;object-fit:cover}
-  .pad{padding:12px}
-  .name{margin:.2em 0 .5em;font-size:18px}
-  .meta{font-size:12px;color:var(--muted)}
-  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-  .tag{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:3px 8px}
-  footer{color:var(--muted);font-size:12px;margin:24px 0}
+  /* ===== Theme & scalable sizes ===== */
+  :root{
+    /* 色 */
+    --bg:#0f1115; --fg:#e7e7e7; --card:#161a22; --muted:#9aa4b2; --border:#262b36; --accent:#6aa8ff;
+    /* 可変寸法（すべて相対）：clamp(min, preferred, max) */
+    --headerH: clamp(3rem, 6vw, 4.2rem);
+    --sidebarW: clamp(14rem, 20vw, 18rem);
+    --radius: 0.75rem;
+    --gap: clamp(0.6rem, 1.2vw, 0.9rem);
+    --wrapMax: 112rem; /* 最大幅は超広画面でも破綻しないように */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+
+  /* ===== Layout ===== */
+  .layout{
+    display:grid;
+    grid-template-columns: var(--sidebarW) 1fr;
+    grid-template-rows: var(--headerH) 1fr;
+    min-height:100vh;
+    max-width:var(--wrapMax);
+    margin:0 auto;
+  }
+
+  /* Header (sticky, scalable) */
+  header{
+    grid-column:1 / -1;
+    position:sticky; top:0;
+    display:flex; align-items:center; gap:var(--gap);
+    padding-inline: clamp(0.8rem, 2vw, 1.2rem);
+    border-bottom:1px solid var(--border);
+    backdrop-filter: blur(8px);
+    background: color-mix(in oklab, var(--bg) 85%, transparent);
+    z-index:10;
+  }
+  h1{margin:0; font-size:clamp(1.1rem, 2.2vw, 1.4rem); font-weight:700}
+  #q{
+    flex:1; min-width:12rem;
+    padding:0.7rem 0.9rem; border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--card); color:var(--fg); font-size:1rem;
+  }
+  .btn{
+    padding:0.7rem 0.9rem; border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--card); color:var(--fg); cursor:pointer; font-size:0.95rem;
+  }
+  #menuBtn{display:none}
+
+  /* Sidebar: own scroll on desktop */
+  aside#sidebar{
+    border-right:1px solid var(--border);
+    background:var(--card);
+    padding: clamp(0.6rem, 1.2vw, 0.9rem);
+    position:sticky; top:var(--headerH);
+    align-self:start;
+    max-height: calc(100vh - var(--headerH));
+    overflow:auto;
+  }
+  .secTitle{margin:0.4rem 0 0.5rem; font-size:0.85rem; color:var(--muted); letter-spacing:0.02em}
+  .nav{display:flex; flex-direction:column; gap:0.4rem; margin-bottom:0.8rem}
+  .nav button{all:unset; display:block; padding:0.55rem 0.7rem; border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; font-size:0.95rem}
+  .nav button.active{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset}
+
+  /* Content */
+  main{padding: clamp(0.8rem, 1.5vw, 1.2rem)}
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(14rem, 28vw, 20rem), 1fr));
+    gap: var(--gap);
+  }
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden}
+  .thumb, iframe{width:100%; aspect-ratio:16/9; border:0; background:#000; display:block; object-fit:cover}
+  .pad{padding: clamp(0.6rem, 1.2vw, 0.9rem)}
+  .name{margin:.2em 0 .5em; font-size:clamp(1rem, 1.6vw, 1.2rem); font-weight:600}
+  .meta{font-size:clamp(0.8rem, 1.2vw, 0.95rem); color:var(--muted)}
+  .tags{display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.5rem}
+  .tag{font-size:clamp(0.72rem, 1vw, 0.85rem); border:1px solid var(--border); border-radius:999px; padding:0.25rem 0.55rem}
+
+  footer{color:var(--muted); font-size:0.85rem; margin:1rem 0}
+
+  /* ===== Mobile drawer (<= 60rem ≒ 960px) ===== */
+  @media (max-width:60rem){
+    .layout{grid-template-columns: 1fr}
+    #menuBtn{display:inline-flex}
+    aside#sidebar{
+      position:fixed; inset:var(--headerH) auto 0 0; width:min(80vw, 22rem);
+      max-height: calc(100vh - var(--headerH));
+      transform: translateX(-100%); transition: transform .2s ease;
+      z-index:30;
+    }
+    aside#sidebar.open{ transform:none }
+    .scrim{position:fixed; inset:0; background:#0008; display:none; z-index:20}
+    .scrim.show{display:block}
+  }
 </style>
 </head>
 <body>
   <div class="layout">
+    <!-- Header -->
     <header>
-      <button id="menuBtn" class="btn">☰</button>
-      <h1 style="margin:0;font-size:20px">Beatboxer図鑑</h1>
+      <button id="menuBtn" class="btn" aria-label="メニュー">☰</button>
+      <h1>Beatboxer図鑑</h1>
       <input id="q" type="search" placeholder="検索（名前・特徴・タグ）">
       <button id="clearBtn" class="btn">クリア</button>
     </header>
 
-    <aside id="sidebar">
+    <!-- Sidebar (scrolls independently) -->
+    <aside id="sidebar" aria-label="サイドメニュー">
       <div>
-        <div class="secTitle">国籍で絞り込み</div>
+        <p class="secTitle">国籍で絞り込み</p>
         <div id="navCountry" class="nav"></div>
       </div>
       <div>
-        <div class="secTitle">GBB年別で絞り込み</div>
+        <p class="secTitle">GBB年別で絞り込み</p>
         <div id="navGBB" class="nav"></div>
       </div>
-      <div class="secTitle">選択を解除</div>
+      <p class="secTitle">選択を解除</p>
       <button id="resetBtn" class="btn" style="width:100%">すべて表示</button>
-      <footer>※ GBB年は代表動画ベースの暫定タグを含みます。</footer>
+      <footer>※年は代表動画に基づく暫定タグを含みます。</footer>
     </aside>
-    <div class="scrim" id="scrim"></div>
+    <div class="scrim" id="scrim" aria-hidden="true"></div>
 
+    <!-- Content -->
     <main>
       <div id="list" class="grid"></div>
     </main>
   </div>
 
 <script>
-/* ===== データ（必要に応じて随時追加） =====
- * gbb: ["GBB2019","GBB2023"] のように複数年タグ可
- * ytId があればクリックでページ内再生
+/* ========= Data =========
+ * country/gbbはメニューでフィルタ。ytIdがあればクリックで埋め込み再生。
  */
 const DATA = [
-  {name:"D-Low", country:"UK", features:"高速・高精度", tags:["キック","スピード"], gbb:["GBB2019"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成。"},
-  {name:"NaPoM", country:"USA", features:"ベース/グルーヴ", tags:["ベース","バトル"], gbb:["GBB2017"], ytId:"YYKMoZnuTJE", comment:"低音の安定感と展開力。"},
-  {name:"Alem", country:"France", features:"王道/構成美", tags:["基礎","構成"], gbb:["GBB2015"], ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。"},
-  {name:"Reeps One", country:"UK", features:"音色表現", tags:["アート","実験"], gbb:[], ytId:"Xj6rAa3G7Hc", comment:"表現の幅を広げる存在。"},
-  {name:"MB14", country:"France", features:"ルーパー/メロ", tags:["メロディ","ループ"], gbb:["GBB2016"], ytId:"LMSlQFVnyvQ", comment:"歌心のあるライン。"},
-  {name:"SO-SO", country:"Japan", features:"ルーパー/個性派", tags:["日本","ループ"], gbb:["GBB2021"], ytId:"aD0hK0ZsQeI", comment:"世界基準の独自路線。"},
-  {name:"RUSY", country:"Japan", features:"高速バトル", tags:["日本","スピード"], gbb:["GBB2023"], ytId:"n5T0Uu7kV2c", comment:"鋭いリズムと迫力。"},
-  {name:"Kohey", country:"Japan", features:"メロ×ベース", tags:["日本","メロ"], gbb:[], ytId:"5Im1W7_5bGQ", comment:"歌と重低音の融合。"},
-  {name:"HIKAKIN", country:"Japan", features:"先駆者", tags:["日本","レジェンド"], gbb:[], ytId:"0bkrhTwfK_w", comment:"国内シーンを切り開いた存在。"},
-  {name:"SARUKANI", country:"Japan", features:"クルー", tags:["日本","チーム"], gbb:["GBB2022"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
+  {name:"D-Low", country:"UK",     features:"高速・高精度",   tags:["キック","スピード"], gbb:["GBB2019"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成。"},
+  {name:"NaPoM", country:"USA",    features:"ベース/グルーヴ", tags:["ベース","バトル"],   gbb:["GBB2017"], ytId:"YYKMoZnuTJE", comment:"低音の安定感と展開力。"},
+  {name:"Alem",  country:"France", features:"王道/構成美",     tags:["基礎","構成"],       gbb:["GBB2015"], ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。"},
+  {name:"Reeps One", country:"UK", features:"音色表現",        tags:["アート","実験"],     gbb:[], ytId:"Xj6rAa3G7Hc", comment:"表現の幅を広げる存在。"},
+  {name:"MB14",  country:"France", features:"ルーパー/メロ",   tags:["メロディ","ループ"], gbb:["GBB2016"], ytId:"LMSlQFVnyvQ", comment:"歌心のあるライン。"},
+  {name:"SO-SO", country:"Japan",  features:"ルーパー/個性派", tags:["日本","ループ"],     gbb:["GBB2021"], ytId:"aD0hK0ZsQeI", comment:"世界基準の独自路線。"},
+  {name:"RUSY",  country:"Japan",  features:"高速バトル",       tags:["日本","スピード"],   gbb:["GBB2023"], ytId:"n5T0Uu7kV2c", comment:"鋭いリズムと迫力。"},
+  {name:"Kohey", country:"Japan",  features:"メロ×ベース",      tags:["日本","メロ"],       gbb:[], ytId:"5Im1W7_5bGQ", comment:"歌と重低音の融合。"},
+  {name:"HIKAKIN", country:"Japan",features:"先駆者",            tags:["日本","レジェンド"], gbb:[], ytId:"0bkrhTwfK_w", comment:"国内シーンを切り開いた存在。"},
+  {name:"SARUKANI", country:"Japan", features:"クルー",         tags:["日本","チーム"],     gbb:["GBB2022"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
 ];
 
-// --------- UI生成（サイドメニュー） ----------
-const navCountry = document.getElementById("navCountry");
-const navGBB = document.getElementById("navGBB");
+const $ = (q)=>document.querySelector(q);
+const navCountry = $("#navCountry");
+const navGBB = $("#navGBB");
+const q = $("#q");
+const clearBtn = $("#clearBtn");
+const list = $("#list");
+
+/* ----- Menu generation ----- */
 const countries = ["All", ...Array.from(new Set(DATA.map(d=>d.country)))];
 const gbbYears = ["All", ...Array.from(new Set(DATA.flatMap(d=>d.gbb)))].sort();
-
 let selCountry = "All";
 let selGBB = "All";
 
-function makeButtons(container, items, onClick, selected){
-  container.innerHTML = items.map(v=>{
-    const active = v===selected ? "active":"";
-    return `<button class="${active}" data-v="${v}">${v}</button>`
-  }).join("");
-  container.querySelectorAll("button").forEach(btn=>{
-    btn.addEventListener("click", ()=> onClick(btn.dataset.v));
-  });
+function makeButtons(container, items, selected, onClick){
+  container.innerHTML = items.map(v=>`<button class="${v===selected?'active':''}" data-v="${v}">${v}</button>`).join("");
+  container.querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>onClick(b.dataset.v)));
 }
 function refreshMenus(){
-  makeButtons(navCountry, countries, (v)=>{ selCountry=v; refreshMenus(); render(); }, selCountry);
-  makeButtons(navGBB, gbbYears, (v)=>{ selGBB=v; refreshMenus(); render(); }, selGBB);
+  makeButtons(navCountry, countries, selCountry, v=>{ selCountry=v; refreshMenus(); render(); });
+  makeButtons(navGBB, gbbYears, selGBB, v=>{ selGBB=v; refreshMenus(); render(); });
 }
 refreshMenus();
 
-// --------- 検索 & フィルタ & 描画 ----------
-const elList = document.getElementById("list");
-const q = document.getElementById("q");
-const clearBtn = document.getElementById("clearBtn");
-document.getElementById("resetBtn").onclick = ()=>{ selCountry="All"; selGBB="All"; q.value=""; refreshMenus(); render(); };
-
+/* ----- Cards ----- */
 function thumbHTML(id, alt){
   const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
   const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
@@ -122,12 +188,13 @@ function cardHTML(p){
         <div class="name">${p.name}（${p.country}）</div>
         <div class="meta">特徴：${p.features}</div>
         <div class="tags">${tags}</div>
-        <div class="meta" style="margin-top:6px">${p.comment}</div>
+        <div class="meta" style="margin-top:.4rem">${p.comment}</div>
       </div>
     </article>`;
 }
-function normalize(x){ return (x||"").toLowerCase(); }
 
+/* ----- Filter + render ----- */
+function normalize(x){return (x||"").toLowerCase();}
 function render(){
   const term = normalize(q.value);
   const out = DATA.filter(p=>{
@@ -139,23 +206,24 @@ function render(){
     }
     return true;
   });
-  elList.innerHTML = out.map(cardHTML).join("");
+  list.innerHTML = out.map(cardHTML).join("");
 }
 q.addEventListener("input", render);
 clearBtn.addEventListener("click", ()=>{ q.value=""; render(); });
+$("#resetBtn").addEventListener("click", ()=>{ selCountry="All"; selGBB="All"; q.value=""; refreshMenus(); render(); });
 render();
 
-// --------- 再生 ---------
+/* ----- Play video ----- */
 function playVideo(id, el){
   el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
 }
 window.playVideo = playVideo;
 
-// --------- モバイル：サイドバー開閉 ----------
-const sidebar = document.getElementById("sidebar");
-const scrim = document.getElementById("scrim");
-document.getElementById("menuBtn").onclick = ()=>{ sidebar.classList.add("open"); scrim.classList.add("show"); };
-scrim.onclick = ()=>{ sidebar.classList.remove("open"); scrim.classList.remove("show"); };
+/* ----- Mobile drawer ----- */
+const sidebar = $("#sidebar");
+const scrim = $("#scrim");
+$("#menuBtn").addEventListener("click", ()=>{ sidebar.classList.add("open"); scrim.classList.add("show"); });
+scrim.addEventListener("click", ()=>{ sidebar.classList.remove("open"); scrim.classList.remove("show"); });
 </script>
 </body>
 </html>
