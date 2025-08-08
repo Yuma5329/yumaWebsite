@@ -1,68 +1,90 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Beatboxer図鑑</title>
   <style>
     :root{--bg:#f6f6f6;--fg:#222;--card:#fff;--muted:#666;--border:#ddd;--w:980px}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    [data-theme="dark"]{--bg:#0f1115;--fg:#eee;--card:#1a1d23;--muted:#aaa;--border:#333}
+    body{margin:0;font-family:sans-serif;background:var(--bg);color:var(--fg)}
     header{padding:18px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10}
     h1{margin:0;font-size:22px}
     .wrap{max-width:var(--w);margin:0 auto}
+    .toggle{float:right;font-size:16px;cursor:pointer}
     main{max-width:var(--w);margin:24px auto;padding:0 16px}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-    .thumb{
-  width:100%;
-  aspect-ratio:16/9;
-  display:block;
-  border:0;
-  object-fit:cover;   /* ← これで縦横比を保ったままトリミング */
-}
+    .thumb,iframe{width:100%;aspect-ratio:16/9;border:0;background:#000;cursor:pointer}
     .pad{padding:12px}
     h2{margin:0 0 6px;font-size:18px}
     .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
     .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
     .tag{font-size:11px;padding:4px 8px;border:1px solid var(--border);border-radius:999px}
-    footer{padding:24px 16px;color:#777;font-size:13px;text-align:center}
+    footer{padding:24px 16px;color:var(--muted);font-size:13px;text-align:center}
   </style>
 </head>
 <body>
-  <header><div class="wrap"><h1>Beatboxer図鑑</h1></div></header>
-  <main><div class="grid" id="list"></div></main>
-  <footer>© 2025 Beatboxer図鑑. All rights reserved.</footer>
+  <header>
+    <div class="wrap">
+      <h1>Beatboxer図鑑 <span class="toggle" id="themeBtn">🌗</span></h1>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid" id="list"></div>
+  </main>
+
+  <footer>
+    © 2025 Beatboxer図鑑. All rights reserved.
+  </footer>
 
   <script>
     const DATA = [
+      {name:"NaPoM", country:"USA", features:"ベース/グルーヴ", tags:["ベース","バトル"], ytId:"Lbvz8R-k4nE", comment:"低音重視の王道スタイル。"},
       {name:"D-Low", country:"UK", features:"高速・高精度", tags:["キック","スピード"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成力。"},
-      {name:"NaPoM", country:"USA", features:"ベース/グルーヴ", tags:["ベース","バトル"], ytId:"YYKMoZnuTJE", comment:"低音重視の王道スタイル。"}
+      {name:"Alem", country:"France", features:"王道/構成美", tags:["基礎","構成"], ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。"},
+      {name:"Reeps One", country:"UK", features:"音色表現", tags:["アート","実験"], ytId:"Xj6rAa3G7Hc", comment:"表現の幅を押し広げる存在。"},
+      {name:"MB14", country:"France", features:"ルーパー/メロ", tags:["メロディ","ハーモニー"], ytId:"LMSlQFVnyvQ", comment:"歌心あるスタイル。"},
+      {name:"SO-SO", country:"Japan", features:"ルーパー/個性派", tags:["日本","ループ"], ytId:"aD0hK0ZsQeI", comment:"世界基準の独自路線。"},
+      {name:"RUSY", country:"Japan", features:"高速バトル", tags:["日本","スピード"], ytId:"n5T0Uu7kV2c", comment:"鋭いリズムと迫力。"},
+      {name:"Kohey", country:"Japan", features:"メロ×ベース", tags:["日本","メロ"], ytId:"5Im1W7_5bGQ", comment:"歌と重低音の融合。"},
+      {name:"HIKAKIN", country:"Japan", features:"先駆者", tags:["日本","レジェンド"], ytId:"0bkrhTwfK_w", comment:"国内シーンを切り開いた存在。"},
+      {name:"SARUKANI", country:"Japan", features:"クルースタイル", tags:["日本","チーム"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
     ];
 
     const list = document.getElementById("list");
 
     function cardHTML(p){
-      const thumbMax = `https://i.ytimg.com/vi/${p.ytId}/maxresdefault.jpg`;
-      const thumbFallback = `https://i.ytimg.com/vi/${p.ytId}/hqdefault.jpg`;
-      
+      const thumb = `https://img.youtube.com/vi/${p.ytId}/hqdefault.jpg`;
+      const tags = p.tags.map(t=>`<span class="tag">${t}</span>`).join("");
       return `
         <article class="card">
-          <img class="thumb"
-               src="${thumbMax}"
-               onerror="this.onerror=null;this.src='${thumbFallback}'"
-               alt="${p.name} thumbnail"
-               onclick="playVideo('${p.ytId}', this)">
-          ...
-        </article>
-      `;
+          <img class="thumb" src="${thumb}" onclick="playVideo('${p.ytId}', this)" alt="${p.name}">
+          <div class="pad">
+            <h2>${p.name}（${p.country}）</h2>
+            <div class="meta">特徴：${p.features}</div>
+            <p>${p.comment}</p>
+            <div class="tags">${tags}</div>
+          </div>
+        </article>`;
     }
 
     function render(){ list.innerHTML = DATA.map(cardHTML).join(""); }
     render();
 
     function playVideo(id, el){
-      el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+      el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
     }
+
+    const themeBtn = document.getElementById("themeBtn");
+    const saved = localStorage.getItem("theme");
+    if(saved) document.documentElement.setAttribute("data-theme", saved);
+    themeBtn.onclick = () => {
+      const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    };
   </script>
 </body>
 </html>
