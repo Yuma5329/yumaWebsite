@@ -8,33 +8,51 @@
 </head>
 <body>
   <div class="layout">
-    <!-- Header -->
+
+    <!-- Header（検索/クリアを撤去） -->
     <header>
       <h1>Beatboxer図鑑</h1>
-      <input id="q" type="search" placeholder="検索（名前・特徴・タグ）">
-      <button id="clearBtn" class="btn">クリア</button>
     </header>
 
-    <!-- Sidebar -->
-    <aside id="sidebar" aria-label="サイドメニュー">
-      <p class="secTitle">国籍で絞り込み</p>
-      <div id="navCountry" class="nav"></div>
-
-      <p class="secTitle">GBB年別で絞り込み</p>
-      <div id="navGBB" class="nav"></div>
-
-      <p class="secTitle">スタイルで絞り込み</p>
-      <div id="navStyle" class="nav"></div>
-
-      <p class="secTitle">選択を解除</p>
-      <button id="resetBtn" class="btn" style="width:100%">すべて表示</button>
-      <footer>※年は代表動画に基づく暫定タグを含みます。</footer>
+    <!-- Sidebar（メニューだけ。レイアウトとスクロールの仕様は従来どおり） -->
+    <aside id="sidebar" aria-label="メニュー">
+      <nav class="menu">
+        <button class="menu-item active" id="menuHome">Beatboxer一覧</button>
+      </nav>
+      <footer class="menu-note">今後ここに他メニューを追加予定</footer>
     </aside>
 
     <!-- Main -->
     <main>
-      <!-- 一覧 -->
+
+      <!-- 一覧（ツールバー＋カードグリッド） -->
       <section id="listView">
+        <!-- 一覧上部ツールバー -->
+        <div id="toolbar" class="toolbar">
+          <label class="ctl">
+            <span>国籍</span>
+            <select id="filterCountry"></select>
+          </label>
+
+          <label class="ctl">
+            <span>年齢（最小）</span>
+            <input id="ageMin" type="number" inputmode="numeric" placeholder="任意">
+          </label>
+
+          <label class="ctl">
+            <span>年齢（最大）</span>
+            <input id="ageMax" type="number" inputmode="numeric" placeholder="任意">
+          </label>
+
+          <label class="ctl">
+            <span>並び替え</span>
+            <select id="sortBy">
+              <option value="name-asc">名前：A → Z</option>
+              <option value="name-desc">名前：Z → A</option>
+            </select>
+          </label>
+        </div>
+
         <div id="list" class="grid"></div>
       </section>
 
@@ -50,34 +68,28 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
   /* ---------- 要素 ---------- */
   const $ = q => document.querySelector(q);
   const listEl = $("#list");
   const listView = $("#listView");
   const detailView = $("#detailView");
   const profileEl = $("#profile");
-  const qEl = $("#q");
-  const navCountry = $("#navCountry"), navGBB = $("#navGBB"), navStyle = $("#navStyle");
+
+  // toolbar
+  const countrySel = $("#filterCountry");
+  const ageMinEl   = $("#ageMin");
+  const ageMaxEl   = $("#ageMax");
+  const sortSel    = $("#sortBy");
 
   /* ---------- 状態 ---------- */
   let LIST = [];                       // マニフェスト（一覧用）
   const PROFILE_CACHE = new Map();     // 詳細キャッシュ
-  let selCountry="All", selGBB="All", selStyle="All";
-  let COUNTRIES=["All"], YEARS=["All"], STYLES=["All"];
-
-  /* ---------- 定数 ---------- */
-  const curatedStyles = [
-    "All","キック","スピード","ベース","重低音","バトル","基礎","構成","構成美","アート","実験",
-    "メロディ","ループ","ルーパー","チーム","レジェンド","ショーケース","メロ×ベース","グルーヴ",
-    "サウンドデザイン","ポリリズム","スクラッチ","口笛","トランペット","インワード","アウトワード",
-    "リップロール","インワードベース","トランジション","高速","低音特化","クラブ向け","ポップス",
-    "ハウス","テクノ","ドラムンベース","トラップ","ダブステップ"
-  ];
 
   /* ---------- 便利関数 ---------- */
   const normalize = x => (x||"").toLowerCase();
   const slugify = s => (s||"").toLowerCase().replace(/[^a-z0-9\-]/g,'');
+  const byNameAsc  = (a,b)=> a.name.localeCompare(b.name, 'en', {sensitivity:'base'});
+  const byNameDesc = (a,b)=> b.name.localeCompare(a.name, 'en', {sensitivity:'base'});
 
   function thumbHTML(id, alt){
     const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
@@ -91,11 +103,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const res = await fetch('profiles/index.json', {cache:'no-store'});
     const json = await res.json();
     LIST = json.list || [];
+    buildToolbarOptions();
+  }
 
-    // フィルター項目をマニフェストから生成
-    COUNTRIES = ["All", ...Array.from(new Set(LIST.map(v=>v.country)))];
-    YEARS     = ["All", ...Array.from(new Set(LIST.flatMap(v=>v.gbb||[])))].sort();
-    STYLES    = Array.from(new Set([...curatedStyles, ...LIST.flatMap(v=>v.tags||[])]));
+  /* ---------- ツールバー初期化 ---------- */
+  function buildToolbarOptions(){
+    // 国籍
+    const countries = ["All", ...Array.from(new Set(LIST.map(v=>v.country)))];
+    countrySel.innerHTML = countries.map(c=>`<option value="${c}">${c}</option>`).join("");
+
+    // 年齢のヒント（プレースホルダとして最小最大を入れるだけ）
+    const ages = LIST.map(v=>v.age).filter(a=>Number.isFinite(a));
+    if(ages.length){
+      const min = Math.min(...ages), max = Math.max(...ages);
+      ageMinEl.placeholder = String(min);
+      ageMaxEl.placeholder = String(max);
+    }
   }
 
   /* ---------- 詳細読み込み ---------- */
@@ -109,25 +132,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return json;
   }
 
-  /* ---------- メニュー生成 ---------- */
-  function makeButtons(container, items, selected, onClick){
-    container.innerHTML = items.map(v=>`<button class="${v===selected?'active':''}" data-v="${v}">${v}</button>`).join("");
-    container.querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>onClick(b.dataset.v)));
-  }
-  function refreshMenus(){
-    makeButtons(navCountry, COUNTRIES, selCountry, v=>{ selCountry=v; refreshMenus(); renderList(); });
-    makeButtons(navGBB,     YEARS,     selGBB,    v=>{ selGBB=v;    refreshMenus(); renderList(); });
-    makeButtons(navStyle,   STYLES,    selStyle,  v=>{ selStyle=v;  refreshMenus(); renderList(); });
-  }
-
   /* ---------- 一覧描画 ---------- */
   function cardHTML(p){
-    // 年齢と最高戦績は存在する時だけ出す
     const ageLine  = (p.age !== undefined && p.age !== null && p.age !== "")
       ? `<span class="stat"><b>年齢：</b>${p.age}</span>` : "";
     const bestLine = p.bestResult
       ? `<span class="stat"><b>最高戦績：</b>${p.bestResult}</span>` : "";
-  
+
     return `
       <article class="card">
         <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
@@ -143,18 +154,30 @@ document.addEventListener('DOMContentLoaded', () => {
       </article>`;
   }
 
+  function currentFilters(){
+    const country = countrySel.value || "All";
+    const min = parseInt(ageMinEl.value,10);
+    const max = parseInt(ageMaxEl.value,10);
+    const sort = sortSel.value || "name-asc";
+    return {country, min: Number.isFinite(min)?min:undefined, max: Number.isFinite(max)?max:undefined, sort};
+  }
+
+  function applySort(arr, key){
+    if(key==="name-desc") return arr.sort(byNameDesc);
+    return arr.sort(byNameAsc);
+  }
+
   function renderList(){
-    const term = normalize(qEl.value);
-    const out = LIST.filter(p=>{
-      if(selCountry!=="All" && p.country!==selCountry) return false;
-      if(selGBB!=="All" && !(p.gbb||[]).includes(selGBB)) return false;
-      if(selStyle!=="All" && !(p.tags||[]).includes(selStyle)) return false;
-      if(term){
-        const hay = normalize([p.name,p.country,(p.tags||[]).join(" "),(p.gbb||[]).join(" "), p.comment||""].join(" "));
-        if(!hay.includes(term)) return false;
-      }
+    const {country, min, max, sort} = currentFilters();
+
+    let out = LIST.filter(p=>{
+      if(country!=="All" && p.country!==country) return false;
+      if(Number.isFinite(min) && !(Number.isFinite(p.age) && p.age>=min)) return false;
+      if(Number.isFinite(max) && !(Number.isFinite(p.age) && p.age<=max)) return false;
       return true;
     });
+
+    applySort(out, sort);
     listEl.innerHTML = out.map(cardHTML).join("");
   }
 
@@ -211,18 +234,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   window.addEventListener('hashchange', routeFromHash);
 
-  /* ---------- その他イベント ---------- */
+  /* ---------- イベント ---------- */
   window.playVideo = (id, el)=>{
     el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
   };
-  $("#clearBtn").addEventListener("click", ()=>{ qEl.value=""; renderList(); });
-  $("#resetBtn").addEventListener("click", ()=>{ selCountry="All"; selGBB="All"; selStyle="All"; qEl.value=""; refreshMenus(); renderList(); });
   $("#backToList").addEventListener("click", ()=>{ history.pushState(null,"",location.pathname+location.search); routeFromHash(); });
+
+  // ツールバーの変更で再描画
+  [countrySel, ageMinEl, ageMaxEl, sortSel].forEach(el=>{
+    el.addEventListener('input', renderList);
+    el.addEventListener('change', renderList);
+  });
 
   /* ---------- 初期化 ---------- */
   (async ()=>{
     await loadManifest();
-    refreshMenus();
     renderList();
     routeFromHash();
   })();
