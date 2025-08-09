@@ -2,31 +2,32 @@
   --bg:#0f1115; --fg:#e7e7e7; --card:#161a22; --muted:#9aa4b2; --border:#262b36; --accent:#6aa8ff;
   --headerH: clamp(3rem, 6vw, 4.2rem);
   --sidebarW: clamp(14rem, 20vw, 18rem);
-  --radius: .75rem;
+  --radius:.75rem;
   --gap: clamp(.6rem, 1.2vw, .9rem);
 }
 
+/* 基本 */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  background:var(--bg);
-  color:var(--fg);
+  background:var(--bg); color:var(--fg);
+  overflow:hidden; /* ←ページ全体のスクロールを止め、各エリアに任せる */
 }
 
-/* ===== 平面2カラム（重なり禁止） ===== */
+/* レイアウト（2カラム固定） */
 .layout{
   display:grid;
   grid-template-columns: var(--sidebarW) minmax(0,1fr);
   grid-template-rows: var(--headerH) 1fr;
   column-gap: var(--gap);
   min-height:100vh;
+  width:100vw;
   margin:0;
-  width:100vw;              /* 画面幅いっぱい */
 }
 
-/* Header */
+/* ヘッダー */
 header{
   grid-column:1/-1;
   position:sticky; top:0; z-index:10;
@@ -34,7 +35,7 @@ header{
   padding-inline: clamp(.8rem,2vw,1.2rem);
   border-bottom:1px solid var(--border);
   backdrop-filter: blur(8px);
-  background: var(--bg);
+  background: var(--bg); /* 互換性重視 */
 }
 h1{margin:0; font-size:clamp(1.1rem,2.2vw,1.4rem); font-weight:700}
 #q{
@@ -47,28 +48,38 @@ h1{margin:0; font-size:clamp(1.1rem,2.2vw,1.4rem); font-weight:700}
   background:var(--card); color:var(--fg); cursor:pointer
 }
 
-/* Sidebar（単体スクロール） */
+/* サイドバー：縦いっぱい＋独自スクロール */
 aside#sidebar{
   grid-column:1; grid-row:2;
   border-right:1px solid var(--border); background:var(--card);
   padding: clamp(.6rem,1.2vw,.9rem);
-  position:sticky; top:var(--headerH); align-self:start;
-  max-height: calc(100vh - var(--headerH)); overflow:auto;
+  position:sticky; top:var(--headerH);
+  align-self:stretch;
+  height: calc(100vh - var(--headerH)); /* ←常に縦いっぱい */
+  overflow-y:auto;                      /* ←サイドバーだけスクロール */
+  overscroll-behavior:contain;
 }
 .secTitle{margin:.4rem 0 .5rem; font-size:.85rem; color:var(--muted); letter-spacing:.02em}
 .nav{display:flex; flex-direction:column; gap:.4rem; margin-bottom:.8rem}
 .nav button{all:unset; display:block; padding:.55rem .7rem; border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; font-size:.95rem}
 .nav button.active{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset}
 
-/* Content */
-main{grid-column:2; grid-row:2; min-width:0; padding: clamp(.8rem,1.5vw,1.2rem)}
+/* 本文：独自スクロール */
+main{
+  grid-column:2; grid-row:2; min-width:0;
+  padding: clamp(.8rem,1.5vw,1.2rem);
+  height: calc(100vh - var(--headerH)); /* ←常に縦いっぱい */
+  overflow-y:auto;                      /* ←本文だけスクロール */
+}
+
+/* グリッド（カード列数） */
 .grid{display:grid; gap:var(--gap)}
-/* 列数：PC4 / 中3 / 小2 / 極小1 */
 @media (min-width:1200px){ .grid{grid-template-columns:repeat(4,1fr)} }
 @media (min-width:900px) and (max-width:1199px){ .grid{grid-template-columns:repeat(3,1fr)} }
 @media (min-width:600px) and (max-width:899px){ .grid{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:599px){ .grid{grid-template-columns:1fr} }
 
+/* カード */
 .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden}
 .thumb,iframe{width:100%; aspect-ratio:16/9; border:0; background:#000; display:block; object-fit:cover}
 .pad{padding: clamp(.6rem,1.2vw,.9rem)}
