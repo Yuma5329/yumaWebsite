@@ -2,16 +2,16 @@ name: Build profiles from CSV/XLSX
 
 on:
   push:
+    branches: [ main ]
     paths:
-      - "tools/**"
-      - "profiles/*.csv"
-      - "profiles/*.xlsx"
-      - "profiles/*.json"
-      - "!profiles/index.json"   # index.json へのコミットはトリガーにしない
-  workflow_dispatch: {}
+      - "tools/profiles.csv"
+      - "tools/profiles.xlsx"
+      - "tools/csv2profiles.js"
+      - "tools/updateIndex.js"
+      - "package.json"
 
 permissions:
-  contents: write   # 生成したファイルをコミットするために必要
+  contents: write
 
 jobs:
   build:
@@ -19,35 +19,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Node (no cache, no deps)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: 18
 
-      # CSV があれば → 個別 JSON を生成
-      - name: CSV -> profiles/*.json
-        if: hashFiles('profiles/*.csv') != ''
-        run: node tools/csv-to-json.js
+      - name: Generate profiles/*.json from CSV/XLSX
+        run: |
+          if [ -f tools/profiles.csv ] || [ -f tools/profiles.xlsx ]; then
+            node tools/csv2profiles.js
+          else
+            echo "No CSV/XLSX found under tools/. Skip generation."
+          fi
 
-      # XLSX があれば → 個別 JSON を生成
-      - name: XLSX -> profiles/*.json
-        if: hashFiles('profiles/*.xlsx') != ''
-        run: node tools/xlsx-to-json.js
-
-      # 個別 JSON から index.json を生成（常に実行）
       - name: Build profiles/index.json
         run: node tools/updateIndex.js
 
-      # 変更があればコミット＆プッシュ
-      - name: Commit & push changes
+      - name: Show changes
         run: |
-          if ! git diff --quiet; then
-            git config user.name  "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -m "chore: update profiles/index.json & generated profiles [skip ci]"
-            git push
-          else
+          git status
+          git --no-pager diff --name-only
+
+      - name: Commit & Push if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add profiles/*.json profiles/index.json 2>/dev/null || true
+          if git diff --cached --quiet; then
             echo "No changes to commit."
+          else
+            git commit -m "chore: update profiles from CSV [skip ci]"
+            git push
           fi
