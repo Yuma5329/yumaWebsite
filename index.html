@@ -135,10 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------- 一覧描画 ---------- */
   function cardHTML(p){
     const ageLine  = (p.age !== undefined && p.age !== null && p.age !== "")
-      ? `<span class="stat"><b>年齢：</b>${p.age}</span>` : "";
-    const bestLine = p.bestResult
-      ? `<span class="stat"><b>最高戦績：</b>${p.bestResult}</span>` : "";
-
+      ? `<span class="stat"><b>年齢：</b>${p.age}</span>`
+      : `<span class="stat"><b>年齢：</b>-</span>`;
+  
+    const bestLine = (p.bestResult !== undefined && p.bestResult !== null && p.bestResult !== "")
+      ? `<span class="stat"><b>最高戦績：</b>${p.bestResult}</span>`
+      : `<span class="stat"><b>最高戦績：</b>-</span>`;
+  
     return `
       <article class="card">
         <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
