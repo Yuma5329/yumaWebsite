@@ -1,37 +1,38 @@
 // tools/importProfiles.js
-// Excel/CSV から profiles/*.json を一括生成し、profiles/index.json も更新します。
-// 使い方:
-//   npm run import:csv   （tools/profiles.csv を読む）
-//   npm run import:xlsx  （tools/profiles.xlsx を読む）
+// CSV から profiles/*.json を一括生成し、profiles/index.json も更新します。
+// 使い方: node tools/importProfiles.js  （GitHub Actions からも同じ）
+//
+// 入力: tools/profiles.csv
+// 必須列: name, country, ytId
+// 任意列: slug, birthdate(YYYY-MM-DD または 2020/1/2 など)
+// 備考: slug が無ければ name から自動生成。ytId はURLでもOK。
 
 const fs = require("fs");
 const path = require("path");
 
 const ROOT = process.cwd();
-const SRC_CSV  = path.join(ROOT, "tools", "profiles.csv");
-const SRC_XLSX = path.join(ROOT, "tools", "profiles.xlsx");
-const OUT_DIR  = path.join(ROOT, "profiles");
+const SRC_CSV   = path.join(ROOT, "tools", "profiles.csv");
+const OUT_DIR   = path.join(ROOT, "profiles");
 const OUT_INDEX = path.join(OUT_DIR, "index.json");
 
-// ---- helpers ----
+/* ========== helpers ========== */
 const ensureDir = (dir) => fs.existsSync(dir) || fs.mkdirSync(dir, { recursive: true });
 
 const slugify = (s) =>
   String(s || "")
     .toLowerCase()
     .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")     // ダイアクリティカル除去
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9\- ]/g, "")
     .trim()
     .replace(/\s+/g, "-");
 
 function toISODate(input) {
   if (!input) return undefined;
-  // 既に YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(String(input))) return String(input);
-
-  // 2020/1/2 や 2020.01.02 などをざっくり許容
-  const s = String(input).replace(/[.\/]/g, "-");
+  const str = String(input).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  // 2020/1/2, 2020.01.02 → 2020-01-02
+  const s = str.replace(/[.\/]/g, "-");
   const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if (m) {
     const y = m[1],
@@ -39,13 +40,12 @@ function toISODate(input) {
       d = String(m[3]).padStart(2, "0");
     return `${y}-${mo}-${d}`;
   }
-  return undefined; // 変換不可なら undefined
+  return undefined;
 }
 
 function extractYouTubeId(v) {
   if (!v) return v;
-  // 既にIDっぽい
-  if (/^[A-Za-z0-9_-]{6,}$/i.test(v)) return v;
+  if (/^[A-Za-z0-9_-]{6,}$/.test(v)) return v; // 既にID風
   try {
     const u = new URL(v);
     if (u.hostname.includes("youtu.be")) return u.pathname.replace("/", "");
@@ -57,26 +57,71 @@ function extractYouTubeId(v) {
   return v;
 }
 
-function readRows() {
-  // 優先：xlsx > csv
-  if (fs.existsSync(SRC_XLSX)) {
-    const wb = XLSX.readFile(SRC_XLSX);
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    return XLSX.utils.sheet_to_json(ws, { defval: "" });
+/** シンプルCSVパーサ（RFC4180相当：ダブルクォート対応） */
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+
+  // 統一改行
+  const s = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (s[i + 1] === '"') {
+          cell += '"';
+          i++; // 連続二重引用 → エスケープ
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        cell += c;
+      }
+    } else {
+      if (c === '"') {
+        inQuotes = true;
+      } else if (c === ",") {
+        row.push(cell);
+        cell = "";
+      } else if (c === "\n") {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = "";
+      } else {
+        cell += c;
+      }
+    }
   }
-  if (fs.existsSync(SRC_CSV)) {
-    const wb = XLSX.readFile(SRC_CSV); // SheetJSはCSVも読めます
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    return XLSX.utils.sheet_to_json(ws, { defval: "" });
-  }
-  throw new Error("tools/profiles.xlsx か tools/profiles.csv が見つかりません。");
+  // 末尾セル・行
+  row.push(cell);
+  rows.push(row);
+
+  // ヘッダ → オブジェクト配列
+  const header = rows.shift().map(h => String(h || "").trim());
+  return rows
+    .filter(r => r.some(v => String(v).trim() !== "")) // 空行除去
+    .map(r => {
+      const obj = {};
+      header.forEach((h, idx) => (obj[h] = r[idx] !== undefined ? String(r[idx]).trim() : ""));
+      return obj;
+    });
 }
 
-// ---- main ----
+/* ========== main ========== */
 (async () => {
   ensureDir(OUT_DIR);
 
-  const rows = readRows();
+  if (!fs.existsSync(SRC_CSV)) {
+    console.error("❌ tools/profiles.csv が見つかりません。");
+    process.exit(1);
+  }
+
+  const csvText = fs.readFileSync(SRC_CSV, "utf8");
+  const rows = parseCSV(csvText);
   if (!rows.length) {
     console.log("入力に行がありません。終了。");
     return;
@@ -102,7 +147,7 @@ function readRows() {
     const ytId = extractYouTubeId(ytRaw);
     const birthdate = toISODate(raw.birthdate || "");
 
-    // 個別JSONの最小フォーマットで保存
+    // 個別JSON（最小）
     const profile = { slug, name, country, ytId };
     if (birthdate) profile.birthdate = birthdate;
 
@@ -112,17 +157,15 @@ function readRows() {
     exists ? updated.push(slug) : created.push(slug);
 
     // index用
-    const indexRow = { slug, name, country, ytId };
-    if (birthdate) indexRow.birthdate = birthdate;
-    list.push(indexRow);
+    const idx = { slug, name, country, ytId };
+    if (birthdate) idx.birthdate = birthdate;
+    list.push(idx);
   }
 
-  // name で安定ソート
   list.sort((a, b) => String(a.name).localeCompare(String(b.name), "ja"));
-
   fs.writeFileSync(OUT_INDEX, JSON.stringify({ list }, null, 2) + "\n", "utf8");
 
-  console.log(`✅ 個別JSON作成: +${created.length}, 更新: ${updated.length}, スキップ: ${skipped.length}`);
+  console.log(`✅ 個別JSON 作成:${created.length} / 更新:${updated.length} / スキップ:${skipped.length}`);
   if (skipped.length) {
     console.log("── スキップ内訳 ──");
     for (const s of skipped) console.log(s.reason, s.row);
