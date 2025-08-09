@@ -104,15 +104,23 @@ footer{color:var(--muted);font-size:.85rem;margin:1rem 0}
 
 /* ========== Toolbar ========== */
 .toolbar{
-  display:grid;
+  position: sticky;
+  top: var(--headerH);     /* ヘッダー直下で固定 */
+  z-index: 20;             /* カードより上に */
+  display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--gap);
-  margin: 0 0 var(--gap);
-  position: sticky; top: calc(var(--headerH) + var(--gap)/2);
-  background: color-mix(in oklab, var(--bg) 92%, transparent);
-  padding: .4rem 0 .6rem;
-  z-index: 5;
+
+  /* 視覚的な区切りと高さ */
+  padding: .8rem .2rem;
+  margin: 0 0 calc(var(--gap) * 1.6);
+
+  /* 不透明めの背景＋境界線で“被り感”をなくす */
+  background: color-mix(in oklab, var(--bg) 98%, transparent);
+  border-bottom: 1px solid var(--border-soft);
+  backdrop-filter: blur(6px) saturate(120%);
 }
+
 .ctl{ display:flex; flex-direction:column; gap:.35rem; }
 .ctl > span{ font-size:.85rem; color:var(--muted); }
 .ctl select, .ctl input[type=number]{
@@ -120,7 +128,7 @@ footer{color:var(--muted);font-size:.85rem;margin:1rem 0}
   border-radius: var(--radius); background:var(--card); color:var(--fg);
 }
 
-/* 年齢の数字入力が窮屈に見えないよう少しだけ幅に余裕を */
+/* 年齢入力のレイアウト縮退 */
 @media (max-width: 900px){
   .toolbar{ grid-template-columns: 1fr 1fr; }
 }
