@@ -4,10 +4,17 @@
       "slug": "d-low",
       "name": "D-Low",
       "country": "UK",
-      "tags": ["キック", "スピード"],
-      "gbb": ["GBB2019"],
-      "ytId": "DFk6aVSWo7s",
-      "comment": "多彩な音と圧巻の構成。"
+      "age": 25,
+      "bestResult": "GBB2019 Champion",
+      "ytId": "DFk6aVSWo7s"
+    },
+    {
+      "slug": "napom",
+      "name": "NaPoM",
+      "country": "USA",
+      "age": 27,
+      "bestResult": "GBB2017 Finalist",
+      "ytId": "YYKMoZnuTJE"
     }
   ]
 }
