@@ -1,0 +1,9 @@
+{
+  "name": "beatboxer-index-builder",
+  "private": true,
+  "version": "1.0.0",
+  "description": "profiles/*.json から profiles/index.json を自動生成",
+  "scripts": {
+    "build:index": "node tools/updateIndex.js"
+  }
+}
