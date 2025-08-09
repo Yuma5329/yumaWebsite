@@ -2,13 +2,7 @@
   "slug": "d-low",
   "name": "D-Low",
   "country": "UK",
-  "birthdate": "1998-10-10",        // ← 追加（ISO形式：YYYY-MM-DD）
-  "summary": "…",
-  "basics": [
-    {"label":"国籍","value":"UK"}
-  ],
-  "strengths": ["キックの精度","…"],
+  "birthdate": "1998-10-10",
+  "ytId": "DFk6aVSWo7s",
   "videoIds": ["DFk6aVSWo7s"],
-  "links": [],
-  "notes": ""
 }
