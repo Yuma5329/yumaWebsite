@@ -134,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
   /* ---------- 一覧描画 ---------- */
   function cardHTML(p){
-    const age  = (p.age ?? "") === "" ? "-" : p.age;                 // 未設定なら "-"
-    const best = (p.bestResult ?? "") === "" ? "-" : p.bestResult;   // 未設定なら "-"
+    const age  = (p.age ?? "") === "" ? "-" : p.age;
+    const best = (p.bestResult ?? "") === "" ? "-" : p.bestResult;
   
     return `
       <article class="card">
