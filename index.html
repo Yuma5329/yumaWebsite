@@ -33,66 +33,26 @@
 
     <!-- Main -->
     <main>
-      <!-- 一覧ビュー -->
+      <!-- 一覧 -->
       <section id="listView">
         <div id="list" class="grid"></div>
       </section>
 
-      <!-- 詳細ビュー（初期は非表示） -->
+      <!-- 詳細 -->
       <section id="detailView" hidden>
         <nav class="detail-breadcrumb">
           <button id="backToList" class="btn">← 一覧へ戻る</button>
         </nav>
-
-        <article id="profile" class="detail">
-          <!-- JSで中身を差し込み -->
-        </article>
+        <article id="profile" class="detail"></article>
       </section>
     </main>
   </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  /* ========= DATA（一覧用） ========= */
-  const DATA = [
-    {name:"D-Low", country:"UK",     features:"高速・高精度",   tags:["キック","スピード"], gbb:["GBB2019"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成。"},
-    {name:"NaPoM", country:"USA",    features:"ベース/グルーヴ", tags:["ベース","バトル","重低音"],   gbb:["GBB2017"], ytId:"YYKMoZnuTJE", comment:"低音の安定感と展開力。"},
-    {name:"Alem",  country:"France", features:"王道/構成美",     tags:["基礎","構成","構成美"],       gbb:["GBB2015"], ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。"},
-    {name:"Reeps One", country:"UK", features:"音色表現",        tags:["アート","実験","サウンドデザイン"],     gbb:[], ytId:"Xj6rAa3G7Hc", comment:"表現の幅を広げる存在。"},
-    {name:"MB14",  country:"France", features:"ルーパー/メロ",   tags:["メロディ","ループ","ルーパー"], gbb:["GBB2016"], ytId:"LMSlQFVnyvQ", comment:"歌心のあるライン。"},
-    {name:"SO-SO", country:"Japan",  features:"ルーパー/個性派", tags:["日本","ループ","ルーパー","サウンドデザイン"], gbb:["GBB2021"], ytId:"aD0hK0ZsQeI", comment:"世界基準の独自路線。"},
-    {name:"RUSY",  country:"Japan",  features:"高速バトル",       tags:["日本","スピード","バトル","高速"],   gbb:["GBB2023"], ytId:"n5T0Uu7kV2c", comment:"鋭いリズムと迫力。"},
-    {name:"Kohey", country:"Japan",  features:"メロ×ベース",      tags:["日本","メロディ","ベース","メロ×ベース"],       gbb:[], ytId:"5Im1W7_5bGQ", comment:"歌と重低音の融合。"},
-    {name:"HIKAKIN", country:"Japan",features:"先駆者",            tags:["日本","レジェンド","ショーケース"], gbb:[], ytId:"0bkrhTwfK_w", comment:"国内シーンを切り開いた存在。"},
-    {name:"SARUKANI", country:"Japan", features:"クルー",         tags:["日本","チーム","ショーケース"],     gbb:["GBB2022"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
-  ];
+document.addEventListener('DOMContentLoaded', () => {
 
-  /* ========= PROFILE（詳細用：まずは D-Low のみ） =========
-     ※事実関係は後で編集できるようプレースホルダーも可。
-  */
-  const PROFILES = {
-    "d-low": {
-      name: "D-Low",
-      country: "UK",
-      avatar: `https://i.ytimg.com/vi/DFk6aVSWo7s/hqdefault.jpg`,
-      summary: "高速コンボと正確なキックで知られるUKのビートボクサー。",
-      basics: [
-        {label:"国籍", value:"UK"},
-        {label:"代表大会", value:"GBB 2019 ほか（※要編集）"},
-        {label:"年齢 / 生年", value:"未設定（後で追記）"}
-      ],
-      strengths: ["キックの精度","複雑なコンボ","展開の速さ"],
-      videoIds: ["DFk6aVSWo7s","YYKMoZnuTJE"],  // 2つ目は例
-      links: [
-        {label:"YouTube 検索", url:"https://www.youtube.com/results?search_query=D-Low+beatbox"},
-        {label:"Instagram（例）", url:"#"}
-      ],
-      notes: "ここに解説や魅力、代表的な技など自由記述で追記してください。"
-    }
-  };
-
-  /* ========= 共通ユーティリティ ========= */
-  const $ = (q)=>document.querySelector(q);
+  /* ---------- 要素 ---------- */
+  const $ = q => document.querySelector(q);
   const listEl = $("#list");
   const listView = $("#listView");
   const detailView = $("#detailView");
@@ -100,8 +60,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const qEl = $("#q");
   const navCountry = $("#navCountry"), navGBB = $("#navGBB"), navStyle = $("#navStyle");
 
-  const countries = ["All", ...Array.from(new Set(DATA.map(d=>d.country)))];
-  const gbbYears  = ["All", ...Array.from(new Set(DATA.flatMap(d=>d.gbb)))].sort();
+  /* ---------- 状態 ---------- */
+  let LIST = [];                       // マニフェスト（一覧用）
+  const PROFILE_CACHE = new Map();     // 詳細キャッシュ
+  let selCountry="All", selGBB="All", selStyle="All";
+  let COUNTRIES=["All"], YEARS=["All"], STYLES=["All"];
+
+  /* ---------- 定数 ---------- */
   const curatedStyles = [
     "All","キック","スピード","ベース","重低音","バトル","基礎","構成","構成美","アート","実験",
     "メロディ","ループ","ルーパー","チーム","レジェンド","ショーケース","メロ×ベース","グルーヴ",
@@ -109,53 +74,73 @@ document.addEventListener('DOMContentLoaded', function () {
     "リップロール","インワードベース","トランジション","高速","低音特化","クラブ向け","ポップス",
     "ハウス","テクノ","ドラムンベース","トラップ","ダブステップ"
   ];
-  const styles = Array.from(new Set([...curatedStyles, ...DATA.flatMap(d=>d.tags||[])]));
 
-  let selCountry="All", selGBB="All", selStyle="All";
+  /* ---------- 便利関数 ---------- */
+  const normalize = x => (x||"").toLowerCase();
+  const slugify = s => (s||"").toLowerCase().replace(/[^a-z0-9\-]/g,'');
 
-  const slug = s => s.toLowerCase().replace(/\s+/g,'').replace(/[^a-z0-9\-]/g,'');
-
-  function makeButtons(container, items, selected, onClick){
-    container.innerHTML = items.map(v=>`<button class="${v===selected?'active':''}" data-v="${v}">${v}</button>`).join("");
-    container.querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>onClick(b.dataset.v)));
-  }
-  function refreshMenus(){
-    makeButtons(navCountry, countries, selCountry, v=>{ selCountry=v; refreshMenus(); renderList(); });
-    makeButtons(navGBB, gbbYears,  selGBB,    v=>{ selGBB=v;    refreshMenus(); renderList(); });
-    makeButtons(navStyle,  styles,  selStyle,  v=>{ selStyle=v;  refreshMenus(); renderList(); });
-  }
-
-  /* ========= 一覧描画 ========= */
   function thumbHTML(id, alt){
     const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
     return `<img class="thumb" src="${max}" onerror="this.onerror=null;this.src='${hq}'" alt="${alt}">`;
   }
+  function iframe(id){ return `<iframe src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>` }
+
+  /* ---------- マニフェスト ---------- */
+  async function loadManifest(){
+    const res = await fetch('profiles/index.json', {cache:'no-store'});
+    const json = await res.json();
+    LIST = json.list || [];
+
+    // フィルター項目をマニフェストから生成
+    COUNTRIES = ["All", ...Array.from(new Set(LIST.map(v=>v.country)))];
+    YEARS     = ["All", ...Array.from(new Set(LIST.flatMap(v=>v.gbb||[])))].sort();
+    STYLES    = Array.from(new Set([...curatedStyles, ...LIST.flatMap(v=>v.tags||[])]));
+  }
+
+  /* ---------- 詳細読み込み ---------- */
+  async function loadProfile(slug){
+    const key = slugify(slug);
+    if (PROFILE_CACHE.has(key)) return PROFILE_CACHE.get(key);
+    const res = await fetch(`profiles/${key}.json`, {cache:'no-store'});
+    if(!res.ok) throw new Error('profile not found: '+key);
+    const json = await res.json();
+    PROFILE_CACHE.set(key, json);
+    return json;
+  }
+
+  /* ---------- メニュー生成 ---------- */
+  function makeButtons(container, items, selected, onClick){
+    container.innerHTML = items.map(v=>`<button class="${v===selected?'active':''}" data-v="${v}">${v}</button>`).join("");
+    container.querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>onClick(b.dataset.v)));
+  }
+  function refreshMenus(){
+    makeButtons(navCountry, COUNTRIES, selCountry, v=>{ selCountry=v; refreshMenus(); renderList(); });
+    makeButtons(navGBB,     YEARS,     selGBB,    v=>{ selGBB=v;    refreshMenus(); renderList(); });
+    makeButtons(navStyle,   STYLES,    selStyle,  v=>{ selStyle=v;  refreshMenus(); renderList(); });
+  }
+
+  /* ---------- 一覧描画 ---------- */
   function cardHTML(p){
-    const tags = [...p.tags, ...p.gbb].map(t=>`<span class="tag">${t}</span>`).join("");
-    const id = slug(p.name);
+    const tags = [...(p.tags||[]), ...(p.gbb||[])].map(t=>`<span class="tag">${t}</span>`).join("");
     return `
       <article class="card">
         <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
         <div class="pad">
-          <div class="name">
-            <a href="#p=${id}" class="link-to-detail">${p.name}</a>（${p.country}）
-          </div>
-          <div class="meta">特徴：${p.features}</div>
+          <div class="name"><a href="#p=${p.slug}" class="link-to-detail">${p.name}</a>（${p.country}）</div>
+          <div class="meta">${p.comment||""}</div>
           <div class="tags">${tags}</div>
-          <div class="meta" style="margin-top:.4rem">${p.comment}</div>
         </div>
       </article>`;
   }
-  function normalize(x){return (x||"").toLowerCase();}
   function renderList(){
     const term = normalize(qEl.value);
-    const out = DATA.filter(p=>{
+    const out = LIST.filter(p=>{
       if(selCountry!=="All" && p.country!==selCountry) return false;
-      if(selGBB!=="All" && !p.gbb.includes(selGBB)) return false;
+      if(selGBB!=="All" && !(p.gbb||[]).includes(selGBB)) return false;
       if(selStyle!=="All" && !(p.tags||[]).includes(selStyle)) return false;
       if(term){
-        const hay = normalize([p.name,p.country,p.features,(p.tags||[]).join(" "),p.gbb.join(" ")].join(" "));
+        const hay = normalize([p.name,p.country,(p.tags||[]).join(" "),(p.gbb||[]).join(" "), p.comment||""].join(" "));
         if(!hay.includes(term)) return false;
       }
       return true;
@@ -163,14 +148,12 @@ document.addEventListener('DOMContentLoaded', function () {
     listEl.innerHTML = out.map(cardHTML).join("");
   }
 
-  /* ========= 詳細描画 ========= */
-  function iframe(id){return `<iframe src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`}
+  /* ---------- 詳細描画 ---------- */
   function detailHTML(p){
     const basics = (p.basics||[]).map(b=>`<div><span>${b.label}</span><strong>${b.value}</strong></div>`).join("");
     const strength = (p.strengths||[]).map(s=>`<span class="tag">${s}</span>`).join("");
     const videos = (p.videoIds||[]).map(v=>`<div class="detail-video">${iframe(v)}</div>`).join("");
     const links = (p.links||[]).map(l=>`<a class="btn link-ghost" href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a>`).join("");
-
     return `
       <header class="detail-head">
         <img class="detail-avatar" src="${p.avatar}" alt="${p.name}">
@@ -179,67 +162,62 @@ document.addEventListener('DOMContentLoaded', function () {
           <div class="meta">${p.summary||""}</div>
         </div>
       </header>
-
       <section class="detail-section">
         <h3>基本情報</h3>
         <div class="detail-basics">${basics}</div>
       </section>
-
       <section class="detail-section">
         <h3>特徴</h3>
         <div class="tags">${strength}</div>
       </section>
-
       <section class="detail-section">
         <h3>代表動画</h3>
         <div class="detail-videos">${videos}</div>
       </section>
-
       <section class="detail-section">
         <h3>リンク</h3>
         <div class="detail-links">${links}</div>
       </section>
-
       <section class="detail-section">
         <h3>メモ</h3>
         <p class="meta">${p.notes||"未入力"}</p>
-      </section>
-    `;
+      </section>`;
   }
 
-  function showList(){
-    detailView.hidden = true;
-    listView.hidden = false;
+  async function showDetailBySlug(s){
+    try{
+      const p = await loadProfile(s);
+      profileEl.innerHTML = detailHTML(p);
+      listView.hidden = true; detailView.hidden = false;
+    }catch(e){
+      console.error(e); showList();
+    }
   }
-  function showDetailBySlug(s){
-    const p = PROFILES[s];
-    if(!p){ showList(); return; }
-    profileEl.innerHTML = detailHTML(p);
-    listView.hidden = true;
-    detailView.hidden = false;
-  }
+  function showList(){ detailView.hidden = true; listView.hidden = false; }
 
-  /* ========= ルーティング（#p=slug） ========= */
+  /* ---------- ルーティング ---------- */
   function routeFromHash(){
     const m = location.hash.match(/p=([a-z0-9\-]+)/i);
-    if(m){ showDetailBySlug(m[1].toLowerCase()); }
-    else { showList(); }
+    if(m){ showDetailBySlug(m[1]); } else { showList(); }
   }
   window.addEventListener('hashchange', routeFromHash);
 
-  /* ========= 再生埋め込み（一覧サムネのクリック） ========= */
+  /* ---------- その他イベント ---------- */
   window.playVideo = (id, el)=>{
     el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
   };
-
-  /* ========= 初期描画 ========= */
   $("#clearBtn").addEventListener("click", ()=>{ qEl.value=""; renderList(); });
   $("#resetBtn").addEventListener("click", ()=>{ selCountry="All"; selGBB="All"; selStyle="All"; qEl.value=""; refreshMenus(); renderList(); });
   $("#backToList").addEventListener("click", ()=>{ history.pushState(null,"",location.pathname+location.search); routeFromHash(); });
 
-  refreshMenus();
-  renderList();
-  routeFromHash(); // ハッシュ直リンク対応
+  /* ---------- 初期化 ---------- */
+  (async ()=>{
+    await loadManifest();
+    refreshMenus();
+    renderList();
+    routeFromHash();
+  })();
+
 });
 </script>
 </body>
