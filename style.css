@@ -92,3 +92,36 @@ footer{color:var(--muted);font-size:.85rem;margin:1rem 0}
   font-size:clamp(.85rem,1.2vw,.95rem);
 }
 .stats .stat b{ font-weight:600; color:var(--fg); }
+
+/* ========== Sidebar menu ========== */
+.menu { display: flex; flex-direction: column; gap: .5rem; }
+.menu-item{
+  all: unset; display:block; width:100%;
+  padding:.6rem .8rem; border:1px solid var(--border);
+  border-radius: var(--radius); cursor:pointer; background:var(--card);
+}
+.menu-item.active{ outline:2px solid var(--accent); }
+
+/* ========== Toolbar ========== */
+.toolbar{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap);
+  margin: 0 0 var(--gap);
+  position: sticky; top: calc(var(--headerH) + var(--gap)/2);
+  background: color-mix(in oklab, var(--bg) 92%, transparent);
+  padding: .4rem 0 .6rem;
+  z-index: 5;
+}
+.ctl{ display:flex; flex-direction:column; gap:.35rem; }
+.ctl > span{ font-size:.85rem; color:var(--muted); }
+.ctl select, .ctl input[type=number]{
+  width:100%; padding:.55rem .7rem; border:1px solid var(--border);
+  border-radius: var(--radius); background:var(--card); color:var(--fg);
+}
+
+/* 年齢の数字入力が窮屈に見えないよう少しだけ幅に余裕を */
+@media (max-width: 900px){
+  .toolbar{ grid-template-columns: 1fr 1fr; }
+}
+
