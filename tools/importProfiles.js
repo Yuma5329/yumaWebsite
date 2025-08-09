@@ -6,7 +6,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const XLSX = require("xlsx");
 
 const ROOT = process.cwd();
 const SRC_CSV  = path.join(ROOT, "tools", "profiles.csv");
