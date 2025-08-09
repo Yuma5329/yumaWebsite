@@ -83,3 +83,12 @@ footer{color:var(--muted);font-size:.85rem;margin:1rem 0}
 .detail-videos{display:grid;gap:.8rem}
 .detail-video iframe{width:100%;aspect-ratio:16/9;border:0;background:#000}
 .detail-links{display:flex;flex-wrap:wrap;gap:.6rem}
+
+.stats{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem 1rem;
+  color:var(--muted);
+  font-size:clamp(.85rem,1.2vw,.95rem);
+}
+.stats .stat b{ font-weight:600; color:var(--fg); }
