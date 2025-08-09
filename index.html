@@ -189,25 +189,61 @@ document.addEventListener('DOMContentLoaded', () => {
     listEl.innerHTML = out.map(cardHTML).join("");
   }
 
-  /* ---------- 詳細描画（個別JSONをそのまま使う） ---------- */
+  /* ---------- 詳細描画（最小構成のみ） ---------- */
   function detailHTML(p){
-    const basics = (p.basics||[]).map(b=>`<div><span>${b.label}</span><strong>${b.value}</strong></div>`).join("");
-    const strength = (p.strengths||[]).map(s=>`<span class="tag">${s}</span>`).join("");
-    const videos = (p.videoIds||[]).map(v=>`<div class="detail-video">${iframe(v)}</div>`).join("");
-    const links = (p.links||[]).map(l=>`<a class="btn link-ghost" href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a>`).join("");
+    // birthdate → 年齢（任意）
+    const age = calcAge(p.birthdate);
+    const ageLine = Number.isFinite(age) ? `<div><span>年齢</span><strong>${age}</strong></div>` : "";
+  
+    // 生年月日（任意）
+    const bdLine = (p.birthdate && /^\d{4}-\d{2}-\d{2}$/.test(p.birthdate))
+      ? `<div><span>生年月日</span><strong>${p.birthdate}</strong></div>` : "";
+  
+    // 国籍（任意）
+    const countryLine = p.country
+      ? `<div><span>国籍</span><strong>${p.country}</strong></div>` : "";
+  
+    // 動画：ytId を1本だけ（任意）
+    const videoBlock = p.ytId
+      ? `<section class="detail-section">
+           <h3>代表動画</h3>
+           <div class="detail-videos">
+             <div class="detail-video">${iframe(p.ytId)}</div>
+           </div>
+         </section>`
+      : "";
+  
     return `
       <header class="detail-head">
         <div class="detail-title">
           <h2>${p.name || ""}</h2>
-          <div class="meta">${p.summary||""}</div>
         </div>
       </header>
-      ${basics ? `<section class="detail-section"><h3>基本情報</h3><div class="detail-basics">${basics}</div></section>` : ""}
-      ${strength ? `<section class="detail-section"><h3>特徴</h3><div class="tags">${strength}</div></section>` : ""}
-      ${videos ? `<section class="detail-section"><h3>代表動画</h3><div class="detail-videos">${videos}</div></section>` : ""}
-      ${links ? `<section class="detail-section"><h3>リンク</h3><div class="detail-links">${links}</div></section>` : ""}
-      ${p.notes ? `<section class="detail-section"><h3>メモ</h3><p class="meta">${p.notes}</p></section>` : ""}
+  
+      ${(countryLine || bdLine || ageLine)
+        ? `<section class="detail-section">
+             <h3>基本情報</h3>
+             <div class="detail-basics">
+               ${countryLine}${bdLine}${ageLine}
+             </div>
+           </section>` : ""}
+  
+      ${videoBlock}
     `;
+  }
+  
+  /* ---------- 生年月日から年齢計算 ---------- */
+  function calcAge(birthdate){
+    if (!birthdate) return undefined;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthdate);
+    if (!m) return undefined;
+    const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+    const today = new Date();
+    let age = today.getFullYear() - y;
+    if (today.getMonth() + 1 < mo || (today.getMonth() + 1 === mo && today.getDate() < d)) {
+      age--;
+    }
+    return age;
   }
 
   async function showDetailBySlug(slug){
