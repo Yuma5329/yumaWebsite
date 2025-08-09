@@ -102,23 +102,21 @@ footer{color:var(--muted);font-size:.85rem;margin:1rem 0}
 }
 .menu-item.active{ outline:2px solid var(--accent); }
 
-/* ========== Toolbar ========== */
+/* ========== Toolbar（重なり防止で sticky をやめる） ========== */
 .toolbar{
-  position: sticky;
-  top: var(--headerH);     /* ヘッダー直下で固定 */
-  z-index: 20;             /* カードより上に */
+  position: static;          /* ← sticky をやめる */
+  top: auto;
+  z-index: auto;
+
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--gap);
 
-  /* 視覚的な区切りと高さ */
   padding: .8rem .2rem;
-  margin: 0 0 calc(var(--gap) * 1.6);
+  margin: 0 0 calc(var(--gap) * 1.6);  /* ツールバーの下に十分な余白を確保 */
 
-  /* 不透明めの背景＋境界線で“被り感”をなくす */
   background: color-mix(in oklab, var(--bg) 98%, transparent);
   border-bottom: 1px solid var(--border-soft);
-  backdrop-filter: blur(6px) saturate(120%);
 }
 
 .ctl{ display:flex; flex-direction:column; gap:.35rem; }
@@ -128,7 +126,7 @@ footer{color:var(--muted);font-size:.85rem;margin:1rem 0}
   border-radius: var(--radius); background:var(--card); color:var(--fg);
 }
 
-/* 年齢入力のレイアウト縮退 */
+/* 幅が狭い時は 2 カラムに畳む */
 @media (max-width: 900px){
   .toolbar{ grid-template-columns: 1fr 1fr; }
 }
