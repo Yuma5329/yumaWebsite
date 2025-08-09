@@ -41,26 +41,42 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ==== Data ==== */
   const DATA = [
     {name:"D-Low", country:"UK",     features:"高速・高精度",   tags:["キック","スピード"], gbb:["GBB2019"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成。"},
-    {name:"NaPoM", country:"USA",    features:"ベース/グルーヴ", tags:["ベース","バトル"],   gbb:["GBB2017"], ytId:"YYKMoZnuTJE", comment:"低音の安定感と展開力。"},
-    {name:"Alem",  country:"France", features:"王道/構成美",     tags:["基礎","構成"],       gbb:["GBB2015"], ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。"},
-    {name:"Reeps One", country:"UK", features:"音色表現",        tags:["アート","実験"],     gbb:[], ytId:"Xj6rAa3G7Hc", comment:"表現の幅を広げる存在。"},
-    {name:"MB14",  country:"France", features:"ルーパー/メロ",   tags:["メロディ","ループ"], gbb:["GBB2016"], ytId:"LMSlQFVnyvQ", comment:"歌心のあるライン。"},
-    {name:"SO-SO", country:"Japan",  features:"ルーパー/個性派", tags:["日本","ループ"],     gbb:["GBB2021"], ytId:"aD0hK0ZsQeI", comment:"世界基準の独自路線。"},
-    {name:"RUSY",  country:"Japan",  features:"高速バトル",       tags:["日本","スピード"],   gbb:["GBB2023"], ytId:"n5T0Uu7kV2c", comment:"鋭いリズムと迫力。"},
-    {name:"Kohey", country:"Japan",  features:"メロ×ベース",      tags:["日本","メロ"],       gbb:[], ytId:"5Im1W7_5bGQ", comment:"歌と重低音の融合。"},
-    {name:"HIKAKIN", country:"Japan",features:"先駆者",            tags:["日本","レジェンド"], gbb:[], ytId:"0bkrhTwfK_w", comment:"国内シーンを切り開いた存在。"},
-    {name:"SARUKANI", country:"Japan", features:"クルー",         tags:["日本","チーム"],     gbb:["GBB2022"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
+    {name:"NaPoM", country:"USA",    features:"ベース/グルーヴ", tags:["ベース","バトル","重低音"],   gbb:["GBB2017"], ytId:"YYKMoZnuTJE", comment:"低音の安定感と展開力。"},
+    {name:"Alem",  country:"France", features:"王道/構成美",     tags:["基礎","構成","構成美"],       gbb:["GBB2015"], ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。"},
+    {name:"Reeps One", country:"UK", features:"音色表現",        tags:["アート","実験","サウンドデザイン"],     gbb:[], ytId:"Xj6rAa3G7Hc", comment:"表現の幅を広げる存在。"},
+    {name:"MB14",  country:"France", features:"ルーパー/メロ",   tags:["メロディ","ループ","ルーパー"], gbb:["GBB2016"], ytId:"LMSlQFVnyvQ", comment:"歌心のあるライン。"},
+    {name:"SO-SO", country:"Japan",  features:"ルーパー/個性派", tags:["日本","ループ","ルーパー","サウンドデザイン"], gbb:["GBB2021"], ytId:"aD0hK0ZsQeI", comment:"世界基準の独自路線。"},
+    {name:"RUSY",  country:"Japan",  features:"高速バトル",       tags:["日本","スピード","バトル","高速"],   gbb:["GBB2023"], ytId:"n5T0Uu7kV2c", comment:"鋭いリズムと迫力。"},
+    {name:"Kohey", country:"Japan",  features:"メロ×ベース",      tags:["日本","メロディ","ベース","メロ×ベース"],       gbb:[], ytId:"5Im1W7_5bGQ", comment:"歌と重低音の融合。"},
+    {name:"HIKAKIN", country:"Japan",features:"先駆者",            tags:["日本","レジェンド","ショーケース"], gbb:[], ytId:"0bkrhTwfK_w", comment:"国内シーンを切り開いた存在。"},
+    {name:"SARUKANI", country:"Japan", features:"クルー",         tags:["日本","チーム","ショーケース"],     gbb:["GBB2022"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
   ];
 
   const $ = (q)=>document.querySelector(q);
   const navCountry = $("#navCountry");
   const navGBB = $("#navGBB");
+  const navStyle = $("#navStyle");
   const q = $("#q");
   const list = $("#list");
 
+  /* ---- Menus ---- */
   const countries = ["All", ...Array.from(new Set(DATA.map(d=>d.country)))];
   const gbbYears  = ["All", ...Array.from(new Set(DATA.flatMap(d=>d.gbb)))].sort();
-  let selCountry = "All", selGBB = "All";
+
+  // スタイル（独断で大量追加。DATAのタグも結合してユニーク化）
+  const curatedStyles = [
+    "All","キック","スピード","ベース","重低音","バトル","基礎","構成","構成美","アート","実験",
+    "メロディ","ループ","ルーパー","チーム","レジェンド","ショーケース","メロ×ベース","グルーヴ",
+    "サウンドデザイン","ポリリズム","スクラッチ","口笛","トランペット","インワード","アウトワード",
+    "リップロール","インワードベース","トランジション","高速","低音特化","クラブ向け","ポップス",
+    "ハウス","テクノ","ドラムンベース","トラップ","ダブステップ"
+  ];
+  const styles = Array.from(new Set([
+    ...curatedStyles,
+    ...DATA.flatMap(d=>d.tags||[])
+  ]));
+
+  let selCountry = "All", selGBB = "All", selStyle = "All";
 
   function makeButtons(container, items, selected, onClick){
     container.innerHTML = items.map(v=>`<button class="${v===selected?'active':''}" data-v="${v}">${v}</button>`).join("");
@@ -69,9 +85,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function refreshMenus(){
     makeButtons(navCountry, countries, selCountry, v=>{ selCountry=v; refreshMenus(); render(); });
     makeButtons(navGBB, gbbYears, selGBB, v=>{ selGBB=v; refreshMenus(); render(); });
+    makeButtons(navStyle,  styles,    selStyle,  v=>{ selStyle =v; refreshMenus(); render(); });
   }
   refreshMenus();
 
+  /* ---- Cards ---- */
   function thumbHTML(id, alt){
     const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
@@ -91,14 +109,16 @@ document.addEventListener('DOMContentLoaded', function () {
       </article>`;
   }
 
+  /* ---- Filter + render ---- */
   function normalize(x){return (x||"").toLowerCase();}
   function render(){
     const term = normalize(q.value);
     const out = DATA.filter(p=>{
       if(selCountry!=="All" && p.country!==selCountry) return false;
       if(selGBB!=="All" && !p.gbb.includes(selGBB)) return false;
+      if(selStyle!=="All" && !(p.tags||[]).includes(selStyle)) return false;
       if(term){
-        const hay = normalize([p.name,p.country,p.features,p.tags.join(" "),p.gbb.join(" ")].join(" "));
+        const hay = normalize([p.name,p.country,p.features,(p.tags||[]).join(" "),p.gbb.join(" ")].join(" "));
         if(!hay.includes(term)) return false;
       }
       return true;
@@ -108,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
   render();
 
   $("#clearBtn").addEventListener("click", ()=>{ q.value=""; render(); });
-  $("#resetBtn").addEventListener("click", ()=>{ selCountry="All"; selGBB="All"; q.value=""; refreshMenus(); render(); });
+  $("#resetBtn").addEventListener("click", ()=>{ selCountry="All"; selGBB="All"; selStyle="All"; q.value=""; refreshMenus(); render(); });
 
   window.playVideo = (id, el)=>{
     el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
