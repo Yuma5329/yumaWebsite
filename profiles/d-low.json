@@ -2,17 +2,13 @@
   "slug": "d-low",
   "name": "D-Low",
   "country": "UK",
-  "age": 25,
-  "bestResult": "GBB2019 Champion",
-  "ytId": "DFk6aVSWo7s",
-  "summary": "高速コンボと正確なキックで知られるUKのビートボクサー。",
+  "birthdate": "1998-10-10",        // ← 追加（ISO形式：YYYY-MM-DD）
+  "summary": "…",
   "basics": [
-    { "label": "国籍", "value": "UK" },
-    { "label": "年齢", "value": "25" }
+    {"label":"国籍","value":"UK"}
   ],
-  "strengths": ["キックの精度", "複雑なコンボ", "展開の速さ"],
+  "strengths": ["キックの精度","…"],
   "videoIds": ["DFk6aVSWo7s"],
-  "links": [
-    { "label": "YouTube 検索", "url": "https://www.youtube.com/results?search_query=D-Low+beatbox" }
-  ]
+  "links": [],
+  "notes": ""
 }
