@@ -1,13 +1,10 @@
 {
-  "name": "beatboxer-index-builder",
+  "name": "yumawebsite",
   "private": true,
-  "version": "1.0.0",
-  "description": "profiles/*.json を自動生成",
+  "version": "0.0.0",
+  "description": "Build profiles index and profiles from CSV",
   "scripts": {
-    "import:csv": "node tools/importProfiles.js",   // CSV でも XLSX でも同じコマンドでOK
-    "import:xlsx": "node tools/importProfiles.js"
-  },
-  "dependencies": {
-    "xlsx": "^0.18.5"
+    "build:index": "node tools/updateIndex.js",
+    "build:csv": "node tools/csv2profiles.js"
   }
 }
