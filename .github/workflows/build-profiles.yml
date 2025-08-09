@@ -6,51 +6,45 @@ on:
     paths:
       - "tools/profiles.csv"
       - "tools/profiles.xlsx"
-      - "tools/csv2profiles.js"
+      - "tools/importProfiles.js"
       - "tools/updateIndex.js"
-      - "package.json"
-
-permissions:
-  contents: write
+      - ".github/workflows/build-profiles.yml"
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Generate profiles/*.json from CSV/XLSX
+      - name: Import profiles (CSV/XLSX -> profiles/*.json)
+        shell: bash
         run: |
           if [ -f tools/profiles.csv ] || [ -f tools/profiles.xlsx ]; then
-            node tools/csv2profiles.js
+            node tools/importProfiles.js
           else
-            echo "No CSV/XLSX found under tools/. Skip generation."
+            echo "No CSV/XLSX found. Skip import."
           fi
 
-      - name: Build profiles/index.json
+      - name: Rebuild profiles/index.json
         run: node tools/updateIndex.js
 
-      - name: Show changes
+      - name: Commit generated files
+        shell: bash
         run: |
-          git status
-          git --no-pager diff --name-only
-
-      - name: Commit & Push if changed
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add profiles/*.json profiles/index.json 2>/dev/null || true
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "chore: update profiles from CSV [skip ci]"
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "chore: update profiles/* and profiles/index.json [skip ci]"
             git push
+          else
+            echo "No changes to commit."
           fi
