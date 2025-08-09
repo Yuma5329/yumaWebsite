@@ -52,10 +52,7 @@ function pickForList(data, fileBase) {
   const slug = String((data.slug ?? fileBase)).toLowerCase();
   const name = data.name;
   const country = data.country;
-
-  // ytId: 単体 or videoIds[0]
-  let ytId = data.ytId || (Array.isArray(data.videoIds) ? data.videoIds[0] : "");
-  ytId = extractYouTubeId(ytId);
+  const ytId = extractYouTubeId(data.ytId);
 
   // birthdate は任意（形式チェックは警告のみ）
   const birthdate = data.birthdate ?? undefined;
