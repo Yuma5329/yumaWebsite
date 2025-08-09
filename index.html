@@ -131,16 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
     PROFILE_CACHE.set(key, json);
     return json;
   }
-
+  
   /* ---------- 一覧描画 ---------- */
   function cardHTML(p){
-    const ageLine  = (p.age !== undefined && p.age !== null && p.age !== "")
-      ? `<span class="stat"><b>年齢：</b>${p.age}</span>`
-      : `<span class="stat"><b>年齢：</b>-</span>`;
-  
-    const bestLine = (p.bestResult !== undefined && p.bestResult !== null && p.bestResult !== "")
-      ? `<span class="stat"><b>最高戦績：</b>${p.bestResult}</span>`
-      : `<span class="stat"><b>最高戦績：</b>-</span>`;
+    const age  = (p.age ?? "") === "" ? "-" : p.age;                 // 未設定なら "-"
+    const best = (p.bestResult ?? "") === "" ? "-" : p.bestResult;   // 未設定なら "-"
   
     return `
       <article class="card">
@@ -150,8 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="#p=${p.slug}" class="link-to-detail">${p.name}</a>（${p.country}）
           </div>
           <div class="stats">
-            ${ageLine}
-            ${bestLine}
+            <div class="stat"><b>年齢：</b>${age}</div>
+            <div class="stat"><b>最高戦績：</b>${best}</div>
           </div>
         </div>
       </article>`;
