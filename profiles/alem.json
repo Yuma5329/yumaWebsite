@@ -1,0 +1,22 @@
+{
+  "slug": "alem",
+  "name": "Alem",
+  "country": "France",
+  "age": null,
+  "bestResult": "",
+  "ytId": "vD2Xwg3p_14",
+  "gbb": ["GBB2015"],
+  "tags": ["基礎", "構成", "構成美"],
+  "avatar": "https://i.ytimg.com/vi/vD2Xwg3p_14/hqdefault.jpg",
+  "summary": "王道のビートと緻密な構成で知られるフランスのトップビートボクサー。",
+  "basics": [
+    { "label": "国籍", "value": "France" },
+    { "label": "年齢", "value": "-" }
+  ],
+  "strengths": ["安定感", "構成力", "リズム精度"],
+  "videoIds": ["vD2Xwg3p_14"],
+  "links": [
+    { "label": "YouTube 検索", "url": "https://www.youtube.com/results?search_query=Alem+beatbox" }
+  ],
+  "notes": ""
+}
