@@ -166,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const links = (p.links||[]).map(l=>`<a class="btn link-ghost" href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a>`).join("");
     return `
       <header class="detail-head">
-        <img class="detail-avatar" src="${p.avatar}" alt="${p.name}">
         <div class="detail-title">
           <h2>${p.name}</h2>
           <div class="meta">${p.summary||""}</div>
