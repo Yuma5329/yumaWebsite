@@ -11,7 +11,7 @@
     --sidebarW: clamp(14rem, 20vw, 18rem);
     --radius: .75rem;
     --gap: clamp(.6rem, 1.2vw, .9rem);
-    --wrapMax: 112rem;
+    --wrapMax: 100vw;   /* 画面幅いっぱいに */
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -23,7 +23,7 @@
     grid-template-columns: var(--sidebarW) minmax(0,1fr);
     grid-template-rows: var(--headerH) 1fr;
     column-gap: var(--gap);
-    min-height:100vh; max-width:var(--wrapMax); margin:0 auto;
+    min-height:100vh; max-width: 100vw; margin: 0;
   }
 
   /* Header */
