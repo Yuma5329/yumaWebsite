@@ -1,14 +1,15 @@
 // profiles/*.json から profiles/index.json を生成（上書き）
 // 使い方: npm run build:index
-// 必須項目: slug, name, country, ytId
-// 任意項目: age, bestResult
 //
-// 便利機能:
+// 必須項目: slug, name, country, ytId  ※ytIdが無ければ videoIds[0] を利用
+// 任意項目: birthdate(YYYY-MM-DD), age(数値/文字列), bestResult
+//
+// 仕様:
 // - slug が無ければファイル名から自動付与
-// - age が "25" のような文字列でも数字に変換
-// - ytId に URL が来ても ID 部分を抽出 (https://youtu.be/ID, https://www.youtube.com/watch?v=ID)
-//
-// 出力の並び順: name の五十音/アルファベット順
+// - age は数値化を試みる（"25" → 25）
+// - birthdate があれば現在日付から年齢を算出し、age より優先
+// - ytId が URL の場合は ID 抽出（https://youtu.be/ID, https://www.youtube.com/watch?v=ID）
+// - 出力の並び順: name の五十音/アルファベット順
 
 const fs = require("fs");
 const path = require("path");
@@ -22,7 +23,7 @@ const OUTPUT = path.join(PROFILES_DIR, "index.json");
 function readJSONSafe(file) {
   let txt = fs.readFileSync(file, "utf8");
   // BOM除去
-  if (txt.charCodeAt(0) === 0xFEFF) txt = txt.slice(1);
+  if (txt.charCodeAt(0) === 0xfeff) txt = txt.slice(1);
   return JSON.parse(txt);
 }
 
@@ -52,16 +53,53 @@ function toNumberOrUndefined(x) {
   return Number.isFinite(n) ? n : undefined;
 }
 
+function calcAgeFromBirthdate(birthdate, asOf = new Date()) {
+  if (!birthdate) return undefined;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthdate);
+  if (!m) return undefined;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  if (!y || !mo || !d) return undefined;
+
+  // 日付だけで比較（時差の影響を受けにくくする）
+  const today = new Date(asOf.getFullYear(), asOf.getMonth(), asOf.getDate());
+  const bday = new Date(y, mo - 1, d);
+
+  let age = today.getFullYear() - bday.getFullYear();
+  const beforeBirthday =
+    today.getMonth() < bday.getMonth() ||
+    (today.getMonth() === bday.getMonth() && today.getDate() < bday.getDate());
+  if (beforeBirthday) age--;
+
+  return age;
+}
+
 // 一覧用に必要なフィールドだけ抽出 & バリデーション
 function pickForList(data, fileBase) {
+  const warnings = [];
+
   const slug = String((data.slug ?? fileBase)).toLowerCase();
   const name = data.name;
   const country = data.country;
-  const ytId = extractYouTubeId(data.ytId);
-  const age = toNumberOrUndefined(data.age);
+
+  // ytId は単体 or videoIds[0] のどちらかから決定
+  let ytId = data.ytId || (Array.isArray(data.videoIds) ? data.videoIds[0] : "");
+  ytId = extractYouTubeId(ytId);
+
+  // birthdate 優先で年齢算出（フォールバックとして age を使用）
+  const birthdate = data.birthdate ?? undefined;
+  if (birthdate && !/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) {
+    warnings.push(`birthdate の形式が不正: ${birthdate}（YYYY-MM-DD で指定してください）`);
+  }
+
+  let age = toNumberOrUndefined(data.age);
+  const ageFromBd = calcAgeFromBirthdate(birthdate);
+  if (ageFromBd !== undefined) age = ageFromBd;
+
   const bestResult = data.bestResult ?? undefined;
 
-  const obj = { slug, name, country, age, bestResult, ytId };
+  const obj = { slug, name, country, birthdate, age, bestResult, ytId };
 
   const missing = [];
   if (!slug) missing.push("slug");
@@ -69,7 +107,7 @@ function pickForList(data, fileBase) {
   if (!country) missing.push("country");
   if (!ytId) missing.push("ytId");
 
-  return { obj, missing };
+  return { obj, missing, warnings };
 }
 
 // ---------- メイン ----------
@@ -97,7 +135,9 @@ function main() {
 
     try {
       const data = readJSONSafe(full);
-      const { obj, missing } = pickForList(data, base);
+      const { obj, missing, warnings: ws } = pickForList(data, base);
+
+      if (ws && ws.length) warnings.push(`⚠ ${f}: ${ws.join(" / ")}`);
 
       if (missing.length) {
         warnings.push(`⚠ ${f}: 必須キー不足 -> ${missing.join(", ")}`);
