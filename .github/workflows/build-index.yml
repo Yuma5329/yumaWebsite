@@ -1,0 +1,30 @@
+name: Build profiles index
+
+on:
+  push:
+    paths:
+      - 'profiles/*.json'
+      - 'tools/updateIndex.js'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Generate profiles/index.json
+        run: node tools/updateIndex.js
+
+      # 変更があれば自動コミット ＆ push
+      - name: Commit & push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: update profiles/index.json [skip ci]'
+          file_pattern: profiles/index.json
