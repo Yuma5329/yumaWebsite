@@ -1,0 +1,53 @@
+name: Build profiles from CSV/XLSX
+
+on:
+  push:
+    paths:
+      - "tools/**"
+      - "profiles/*.csv"
+      - "profiles/*.xlsx"
+      - "profiles/*.json"
+      - "!profiles/index.json"   # index.json へのコミットはトリガーにしない
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # 生成したファイルをコミットするために必要
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node (no cache, no deps)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      # CSV があれば → 個別 JSON を生成
+      - name: CSV -> profiles/*.json
+        if: hashFiles('profiles/*.csv') != ''
+        run: node tools/csv-to-json.js
+
+      # XLSX があれば → 個別 JSON を生成
+      - name: XLSX -> profiles/*.json
+        if: hashFiles('profiles/*.xlsx') != ''
+        run: node tools/xlsx-to-json.js
+
+      # 個別 JSON から index.json を生成（常に実行）
+      - name: Build profiles/index.json
+        run: node tools/updateIndex.js
+
+      # 変更があればコミット＆プッシュ
+      - name: Commit & push changes
+        run: |
+          if ! git diff --quiet; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "chore: update profiles/index.json & generated profiles [skip ci]"
+            git push
+          else
+            echo "No changes to commit."
+          fi
