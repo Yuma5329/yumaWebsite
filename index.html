@@ -56,7 +56,7 @@
         <div id="list" class="grid"></div>
       </section>
 
-      <!-- 詳細（個別JSONの内容を表示） -->
+      <!-- 詳細（個別JSONの内容を表示：最小表示） -->
       <section id="detailView" hidden>
         <nav class="detail-breadcrumb">
           <button id="backToList" class="btn">← 一覧へ戻る</button>
@@ -82,7 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const sortSel    = $("#sortBy");
 
   /* ---------- 状態 ---------- */
-  /** LIST要素は {slug,name,country,ytId,birthdate?} */
+  // LIST は profiles/index.json を読み込んで、
+  // birthdate から算出した派生フィールド `_age` を持つように標準化する
   let LIST = [];
   const PROFILE_CACHE = new Map();
 
@@ -96,19 +97,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
     return `<img class="thumb" src="${max}" onerror="this.onerror=null;this.src='${hq}'" alt="${alt}">`;
   }
-  function iframe(id){ return `<iframe src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>` }
+  function iframe(id){
+    return `<iframe src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  }
 
-  /** birthdate(YYYY-MM-DD) から年齢を算出 */
+  /** 生年月日(YYYY-MM-DD) → 年齢（整数） */
   function calcAge(birthdate, asOf=new Date()){
-    if(!birthdate || !/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) return undefined;
-    const [y,m,d] = birthdate.split('-').map(n=>parseInt(n,10));
+    if(!birthdate) return undefined;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birthdate).trim());
+    if(!m) return undefined;
+    const y = +m[1], mo = +m[2], d = +m[3];
+    // 日付だけ比較（時差の影響を除く）
     const today = new Date(asOf.getFullYear(), asOf.getMonth(), asOf.getDate());
-    const bday  = new Date(y, m-1, d);
+    const bday  = new Date(y, mo - 1, d);
     let age = today.getFullYear() - bday.getFullYear();
-    const before =
+    const beforeBirthday =
       today.getMonth() < bday.getMonth() ||
       (today.getMonth() === bday.getMonth() && today.getDate() < bday.getDate());
-    if(before) age--;
+    if (beforeBirthday) age--;
     return Number.isFinite(age) ? age : undefined;
   }
 
@@ -116,11 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadManifest(){
     const res = await fetch('profiles/index.json', {cache:'no-store'});
     const json = await res.json();
-    LIST = (json.list || []).map(row => ({
-      ...row,
-      // 派生値：年齢（birthdate があれば算出）
-      _age: calcAge(row.birthdate)
-    }));
+    // birthdate から年齢を計算して _age に格納（以後は _age だけを見る）
+    LIST = (json.list || []).map(row => ({ ...row, _age: calcAge(row.birthdate) }));
     buildToolbarOptions();
   }
 
@@ -149,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- 一覧描画 ---------- */
   function cardHTML(p){
-    const age = Number.isFinite(p._age) ? p._age : "-";
+    const ageText = Number.isFinite(p._age) ? p._age : "-";
     return `
       <article class="card">
         <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
@@ -158,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="#p=${p.slug}" class="link-to-detail">${p.name}</a>（${p.country}）
           </div>
           <div class="stats">
-            <div class="stat"><b>年齢：</b>${age}</div>
+            <div class="stat"><b>年齢：</b>${ageText}</div>
           </div>
         </div>
       </article>`;
@@ -189,61 +192,35 @@ document.addEventListener('DOMContentLoaded', () => {
     listEl.innerHTML = out.map(cardHTML).join("");
   }
 
-  /* ---------- 詳細描画（最小構成のみ） ---------- */
+  /* ---------- 詳細描画（最小構成） ---------- */
   function detailHTML(p){
-    // birthdate → 年齢（任意）
     const age = calcAge(p.birthdate);
-    const ageLine = Number.isFinite(age) ? `<div><span>年齢</span><strong>${age}</strong></div>` : "";
-  
-    // 生年月日（任意）
-    const bdLine = (p.birthdate && /^\d{4}-\d{2}-\d{2}$/.test(p.birthdate))
-      ? `<div><span>生年月日</span><strong>${p.birthdate}</strong></div>` : "";
-  
-    // 国籍（任意）
-    const countryLine = p.country
-      ? `<div><span>国籍</span><strong>${p.country}</strong></div>` : "";
-  
-    // 動画：ytId を1本だけ（任意）
-    const videoBlock = p.ytId
+    const blocks = [];
+    if (p.country)   blocks.push(`<div><span>国籍</span><strong>${p.country}</strong></div>`);
+    if (p.birthdate) blocks.push(`<div><span>生年月日</span><strong>${p.birthdate}</strong></div>`);
+    if (Number.isFinite(age)) blocks.push(`<div><span>年齢</span><strong>${age}</strong></div>`);
+
+    const basicSection = blocks.length
       ? `<section class="detail-section">
-           <h3>代表動画</h3>
-           <div class="detail-videos">
-             <div class="detail-video">${iframe(p.ytId)}</div>
-           </div>
+           <h3>基本情報</h3>
+           <div class="detail-basics">${blocks.join("")}</div>
          </section>`
       : "";
-  
+
+    const videoSection = p.ytId
+      ? `<section class="detail-section">
+           <h3>代表動画</h3>
+           <div class="detail-videos"><div class="detail-video">${iframe(p.ytId)}</div></div>
+         </section>`
+      : "";
+
     return `
       <header class="detail-head">
-        <div class="detail-title">
-          <h2>${p.name || ""}</h2>
-        </div>
+        <div class="detail-title"><h2>${p.name || ""}</h2></div>
       </header>
-  
-      ${(countryLine || bdLine || ageLine)
-        ? `<section class="detail-section">
-             <h3>基本情報</h3>
-             <div class="detail-basics">
-               ${countryLine}${bdLine}${ageLine}
-             </div>
-           </section>` : ""}
-  
-      ${videoBlock}
+      ${basicSection}
+      ${videoSection}
     `;
-  }
-  
-  /* ---------- 生年月日から年齢計算 ---------- */
-  function calcAge(birthdate){
-    if (!birthdate) return undefined;
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthdate);
-    if (!m) return undefined;
-    const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
-    const today = new Date();
-    let age = today.getFullYear() - y;
-    if (today.getMonth() + 1 < mo || (today.getMonth() + 1 === mo && today.getDate() < d)) {
-      age--;
-    }
-    return age;
   }
 
   async function showDetailBySlug(slug){
