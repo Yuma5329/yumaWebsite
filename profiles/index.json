@@ -8,6 +8,13 @@
       "birthdate": "1998-10-10"
     },
     {
+      "slug": "hiss",
+      "name": "Hiss",
+      "country": "South Korea",
+      "ytId": "OTlkpNmQq_s",
+      "birthdate": "1999-02-07"
+    },
+    {
       "slug": "napom",
       "name": "NaPoM",
       "country": "USA",
@@ -15,11 +22,25 @@
       "birthdate": "1996-08-09"
     },
     {
+      "slug": "showgo",
+      "name": "SHOW-GO",
+      "country": "Japan",
+      "ytId": "eg9_ymCEAF8",
+      "birthdate": "1999-05-07"
+    },
+    {
       "slug": "so-so",
       "name": "SO-SO",
       "country": "Japan",
       "ytId": "XoicaHc5m4M",
       "birthdate": "1999‑10‑13"
+    },
+    {
+      "slug": "wing",
+      "name": "WING",
+      "country": "South Korea",
+      "ytId": "qlrpeYdm9Ec",
+      "birthdate": "1994-08-21"
     }
   ]
 }
