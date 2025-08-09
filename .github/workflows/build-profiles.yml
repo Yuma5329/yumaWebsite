@@ -1,49 +1,37 @@
-name: Build profiles from CSV/XLSX
+name: Build profiles from CSV (push)
 
 on:
   push:
-    branches: [ main ]
     paths:
       - "tools/profiles.csv"
       - "tools/importProfiles.js"
       - "tools/updateIndex.js"
       - ".github/workflows/build-profiles.yml"
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Import profiles (CSV/XLSX -> profiles/*.json)
-        shell: bash
+      - name: Generate profiles from CSV
         run: |
-          if [ -f tools/profiles.csv ] || [ -f tools/profiles.xlsx ]; then
-            node tools/importProfiles.js
-          else
-            echo "No CSV/XLSX found. Skip import."
-          fi
+          node tools/importProfiles.js
+          node tools/updateIndex.js
 
-      - name: Rebuild profiles/index.json
-        run: node tools/updateIndex.js
-
-      - name: Commit generated files
-        shell: bash
+      - name: Commit & push changes
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            git config user.name  "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -m "chore: update profiles/* and profiles/index.json [skip ci]"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add profiles/*.json profiles/index.json || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update profiles from CSV [skip ci]"
             git push
           else
-            echo "No changes to commit."
+            echo "No changes."
           fi
