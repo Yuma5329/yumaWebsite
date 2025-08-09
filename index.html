@@ -9,12 +9,12 @@
 <body>
   <div class="layout">
 
-    <!-- Header（検索/クリアを撤去） -->
+    <!-- Header -->
     <header>
       <h1>Beatboxer図鑑</h1>
     </header>
 
-    <!-- Sidebar（メニューだけ。レイアウトとスクロールの仕様は従来どおり） -->
+    <!-- Sidebar（メニューのみ） -->
     <aside id="sidebar" aria-label="メニュー">
       <nav class="menu">
         <button class="menu-item active" id="menuHome">Beatboxer一覧</button>
@@ -25,9 +25,9 @@
     <!-- Main -->
     <main>
 
-      <!-- 一覧（ツールバー＋カードグリッド） -->
+      <!-- 一覧 -->
       <section id="listView">
-        <!-- 一覧上部ツールバー -->
+        <!-- ツールバー -->
         <div id="toolbar" class="toolbar">
           <label class="ctl">
             <span>国籍</span>
@@ -56,7 +56,7 @@
         <div id="list" class="grid"></div>
       </section>
 
-      <!-- 詳細 -->
+      <!-- 詳細（個別JSONの内容を表示） -->
       <section id="detailView" hidden>
         <nav class="detail-breadcrumb">
           <button id="backToList" class="btn">← 一覧へ戻る</button>
@@ -70,10 +70,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   /* ---------- 要素 ---------- */
   const $ = q => document.querySelector(q);
-  const listEl = $("#list");
-  const listView = $("#listView");
+  const listEl     = $("#list");
+  const listView   = $("#listView");
   const detailView = $("#detailView");
-  const profileEl = $("#profile");
+  const profileEl  = $("#profile");
 
   // toolbar
   const countrySel = $("#filterCountry");
@@ -82,14 +82,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const sortSel    = $("#sortBy");
 
   /* ---------- 状態 ---------- */
-  let LIST = [];                       // マニフェスト（一覧用）
-  const PROFILE_CACHE = new Map();     // 詳細キャッシュ
+  /** LIST要素は {slug,name,country,ytId,birthdate?} */
+  let LIST = [];
+  const PROFILE_CACHE = new Map();
 
-  /* ---------- 便利関数 ---------- */
-  const normalize = x => (x||"").toLowerCase();
+  /* ---------- ユーティリティ ---------- */
   const slugify = s => (s||"").toLowerCase().replace(/[^a-z0-9\-]/g,'');
-  const byNameAsc  = (a,b)=> a.name.localeCompare(b.name, 'en', {sensitivity:'base'});
-  const byNameDesc = (a,b)=> b.name.localeCompare(a.name, 'en', {sensitivity:'base'});
+  const byNameAsc  = (a,b)=> a.name.localeCompare(b.name, 'ja', {sensitivity:'base'});
+  const byNameDesc = (a,b)=> b.name.localeCompare(a.name, 'ja', {sensitivity:'base'});
 
   function thumbHTML(id, alt){
     const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
@@ -98,26 +98,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function iframe(id){ return `<iframe src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>` }
 
+  /** birthdate(YYYY-MM-DD) から年齢を算出 */
+  function calcAge(birthdate, asOf=new Date()){
+    if(!birthdate || !/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) return undefined;
+    const [y,m,d] = birthdate.split('-').map(n=>parseInt(n,10));
+    const today = new Date(asOf.getFullYear(), asOf.getMonth(), asOf.getDate());
+    const bday  = new Date(y, m-1, d);
+    let age = today.getFullYear() - bday.getFullYear();
+    const before =
+      today.getMonth() < bday.getMonth() ||
+      (today.getMonth() === bday.getMonth() && today.getDate() < bday.getDate());
+    if(before) age--;
+    return Number.isFinite(age) ? age : undefined;
+  }
+
   /* ---------- マニフェスト ---------- */
   async function loadManifest(){
     const res = await fetch('profiles/index.json', {cache:'no-store'});
     const json = await res.json();
-    LIST = json.list || [];
+    LIST = (json.list || []).map(row => ({
+      ...row,
+      // 派生値：年齢（birthdate があれば算出）
+      _age: calcAge(row.birthdate)
+    }));
     buildToolbarOptions();
   }
 
   /* ---------- ツールバー初期化 ---------- */
   function buildToolbarOptions(){
-    // 国籍
     const countries = ["All", ...Array.from(new Set(LIST.map(v=>v.country)))];
     countrySel.innerHTML = countries.map(c=>`<option value="${c}">${c}</option>`).join("");
 
-    // 年齢のヒント（プレースホルダとして最小最大を入れるだけ）
-    const ages = LIST.map(v=>v.age).filter(a=>Number.isFinite(a));
+    const ages = LIST.map(v=>v._age).filter(a=>Number.isFinite(a));
     if(ages.length){
-      const min = Math.min(...ages), max = Math.max(...ages);
-      ageMinEl.placeholder = String(min);
-      ageMaxEl.placeholder = String(max);
+      ageMinEl.placeholder = String(Math.min(...ages));
+      ageMaxEl.placeholder = String(Math.max(...ages));
     }
   }
 
@@ -131,12 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
     PROFILE_CACHE.set(key, json);
     return json;
   }
-  
+
   /* ---------- 一覧描画 ---------- */
   function cardHTML(p){
-    const age  = (p.age ?? "") === "" ? "-" : p.age;
-    const best = (p.bestResult ?? "") === "" ? "-" : p.bestResult;
-  
+    const age = Number.isFinite(p._age) ? p._age : "-";
     return `
       <article class="card">
         <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
@@ -146,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="stats">
             <div class="stat"><b>年齢：</b>${age}</div>
-            <div class="stat"><b>最高戦績：</b>${best}</div>
           </div>
         </div>
       </article>`;
@@ -167,19 +179,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderList(){
     const {country, min, max, sort} = currentFilters();
-
     let out = LIST.filter(p=>{
       if(country!=="All" && p.country!==country) return false;
-      if(Number.isFinite(min) && !(Number.isFinite(p.age) && p.age>=min)) return false;
-      if(Number.isFinite(max) && !(Number.isFinite(p.age) && p.age<=max)) return false;
+      if(Number.isFinite(min) && !(Number.isFinite(p._age) && p._age>=min)) return false;
+      if(Number.isFinite(max) && !(Number.isFinite(p._age) && p._age<=max)) return false;
       return true;
     });
-
     applySort(out, sort);
     listEl.innerHTML = out.map(cardHTML).join("");
   }
 
-  /* ---------- 詳細描画 ---------- */
+  /* ---------- 詳細描画（個別JSONをそのまま使う） ---------- */
   function detailHTML(p){
     const basics = (p.basics||[]).map(b=>`<div><span>${b.label}</span><strong>${b.value}</strong></div>`).join("");
     const strength = (p.strengths||[]).map(s=>`<span class="tag">${s}</span>`).join("");
@@ -188,35 +198,21 @@ document.addEventListener('DOMContentLoaded', () => {
     return `
       <header class="detail-head">
         <div class="detail-title">
-          <h2>${p.name}</h2>
+          <h2>${p.name || ""}</h2>
           <div class="meta">${p.summary||""}</div>
         </div>
       </header>
-      <section class="detail-section">
-        <h3>基本情報</h3>
-        <div class="detail-basics">${basics}</div>
-      </section>
-      <section class="detail-section">
-        <h3>特徴</h3>
-        <div class="tags">${strength}</div>
-      </section>
-      <section class="detail-section">
-        <h3>代表動画</h3>
-        <div class="detail-videos">${videos}</div>
-      </section>
-      <section class="detail-section">
-        <h3>リンク</h3>
-        <div class="detail-links">${links}</div>
-      </section>
-      <section class="detail-section">
-        <h3>メモ</h3>
-        <p class="meta">${p.notes||"未入力"}</p>
-      </section>`;
+      ${basics ? `<section class="detail-section"><h3>基本情報</h3><div class="detail-basics">${basics}</div></section>` : ""}
+      ${strength ? `<section class="detail-section"><h3>特徴</h3><div class="tags">${strength}</div></section>` : ""}
+      ${videos ? `<section class="detail-section"><h3>代表動画</h3><div class="detail-videos">${videos}</div></section>` : ""}
+      ${links ? `<section class="detail-section"><h3>リンク</h3><div class="detail-links">${links}</div></section>` : ""}
+      ${p.notes ? `<section class="detail-section"><h3>メモ</h3><p class="meta">${p.notes}</p></section>` : ""}
+    `;
   }
 
-  async function showDetailBySlug(s){
+  async function showDetailBySlug(slug){
     try{
-      const p = await loadProfile(s);
+      const p = await loadProfile(slug);
       profileEl.innerHTML = detailHTML(p);
       listView.hidden = true; detailView.hidden = false;
     }catch(e){
@@ -238,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   $("#backToList").addEventListener("click", ()=>{ history.pushState(null,"",location.pathname+location.search); routeFromHash(); });
 
-  // ツールバーの変更で再描画
   [countrySel, ageMinEl, ageMaxEl, sortSel].forEach(el=>{
     el.addEventListener('input', renderList);
     el.addEventListener('change', renderList);
