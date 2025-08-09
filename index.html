@@ -113,92 +113,104 @@
   </div>
 
 <script>
-/* ==== Data ==== */
-const DATA = [
-  {name:"D-Low", country:"UK",     features:"高速・高精度",   tags:["キック","スピード"], gbb:["GBB2019"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成。"},
-  {name:"NaPoM", country:"USA",    features:"ベース/グルーヴ", tags:["ベース","バトル"],   gbb:["GBB2017"], ytId:"YYKMoZnuTJE", comment:"低音の安定感と展開力。"},
-  {name:"Alem",  country:"France", features:"王道/構成美",     tags:["基礎","構成"],       gbb:["GBB2015"], ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。"},
-  {name:"Reeps One", country:"UK", features:"音色表現",        tags:["アート","実験"],     gbb:[], ytId:"Xj6rAa3G7Hc", comment:"表現の幅を広げる存在。"},
-  {name:"MB14",  country:"France", features:"ルーパー/メロ",   tags:["メロディ","ループ"], gbb:["GBB2016"], ytId:"LMSlQFVnyvQ", comment:"歌心のあるライン。"},
-  {name:"SO-SO", country:"Japan",  features:"ルーパー/個性派", tags:["日本","ループ"],     gbb:["GBB2021"], ytId:"aD0hK0ZsQeI", comment:"世界基準の独自路線。"},
-  {name:"RUSY",  country:"Japan",  features:"高速バトル",       tags:["日本","スピード"],   gbb:["GBB2023"], ytId:"n5T0Uu7kV2c", comment:"鋭いリズムと迫力。"},
-  {name:"Kohey", country:"Japan",  features:"メロ×ベース",      tags:["日本","メロ"],       gbb:[], ytId:"5Im1W7_5bGQ", comment:"歌と重低音の融合。"},
-  {name:"HIKAKIN", country:"Japan",features:"先駆者",            tags:["日本","レジェンド"], gbb:[], ytId:"0bkrhTwfK_w", comment:"国内シーンを切り開いた存在。"},
-  {name:"SARUKANI", country:"Japan", features:"クルー",         tags:["日本","チーム"],     gbb:["GBB2022"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
-];
+document.addEventListener('DOMContentLoaded', function () {
+  const showErr = (e) => {
+    console.error(e);
+    const box = document.createElement('div');
+    box.style.cssText = 'margin:1rem;padding:1rem;border:1px solid #ff6; background:#221; color:#fea; border-radius:8px;';
+    box.innerHTML = '⚠️ 初期化中にエラーが発生しました。<br><small>'+ String(e) +'</small>';
+    document.querySelector('main')?.prepend(box);
+  };
 
-const $ = (q)=>document.querySelector(q);
-const navCountry = $("#navCountry");
-const navGBB = $("#navGBB");
-const q = $("#q");
-const list = $("#list");
+  try {
+    /* ==== Data ==== */
+    const DATA = [
+      {name:"D-Low", country:"UK",     features:"高速・高精度",   tags:["キック","スピード"], gbb:["GBB2019"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成。"},
+      {name:"NaPoM", country:"USA",    features:"ベース/グルーヴ", tags:["ベース","バトル"],   gbb:["GBB2017"], ytId:"YYKMoZnuTJE", comment:"低音の安定感と展開力。"},
+      {name:"Alem",  country:"France", features:"王道/構成美",     tags:["基礎","構成"],       gbb:["GBB2015"], ytId:"vD2Xwg3p_14", comment:"基礎から完成度が高い。"},
+      {name:"Reeps One", country:"UK", features:"音色表現",        tags:["アート","実験"],     gbb:[], ytId:"Xj6rAa3G7Hc", comment:"表現の幅を広げる存在。"},
+      {name:"MB14",  country:"France", features:"ルーパー/メロ",   tags:["メロディ","ループ"], gbb:["GBB2016"], ytId:"LMSlQFVnyvQ", comment:"歌心のあるライン。"},
+      {name:"SO-SO", country:"Japan",  features:"ルーパー/個性派", tags:["日本","ループ"],     gbb:["GBB2021"], ytId:"aD0hK0ZsQeI", comment:"世界基準の独自路線。"},
+      {name:"RUSY",  country:"Japan",  features:"高速バトル",       tags:["日本","スピード"],   gbb:["GBB2023"], ytId:"n5T0Uu7kV2c", comment:"鋭いリズムと迫力。"},
+      {name:"Kohey", country:"Japan",  features:"メロ×ベース",      tags:["日本","メロ"],       gbb:[], ytId:"5Im1W7_5bGQ", comment:"歌と重低音の融合。"},
+      {name:"HIKAKIN", country:"Japan",features:"先駆者",            tags:["日本","レジェンド"], gbb:[], ytId:"0bkrhTwfK_w", comment:"国内シーンを切り開いた存在。"},
+      {name:"SARUKANI", country:"Japan", features:"クルー",         tags:["日本","チーム"],     gbb:["GBB2022"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
+    ];
 
-/* ---- Menus ---- */
-const countries = ["All", ...Array.from(new Set(DATA.map(d=>d.country)))];
-const gbbYears  = ["All", ...Array.from(new Set(DATA.flatMap(d=>d.gbb)))].sort();
-let selCountry = "All", selGBB = "All";
+    const $ = (q)=>document.querySelector(q);
+    const navCountry = $("#navCountry");
+    const navGBB = $("#navGBB");
+    const q = $("#q");
+    const list = $("#list");
 
-function makeButtons(container, items, selected, onClick){
-  container.innerHTML = items.map(v=>`<button class="${v===selected?'active':''}" data-v="${v}">${v}</button>`).join("");
-  container.querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>onClick(b.dataset.v)));
-}
-function refreshMenus(){
-  makeButtons(navCountry, countries, selCountry, v=>{ selCountry=v; refreshMenus(); render(); });
-  makeButtons(navGBB, gbbYears, selGBB, v=>{ selGBB=v; refreshMenus(); render(); });
-}
-refreshMenus();
+    // --- menus
+    const countries = ["All", ...Array.from(new Set(DATA.map(d=>d.country)))];
+    const gbbYears  = ["All", ...Array.from(new Set(DATA.flatMap(d=>d.gbb)))].sort();
+    let selCountry = "All", selGBB = "All";
 
-/* ---- Cards ---- */
-function thumbHTML(id, alt){
-  const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
-  const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-  return `<img class="thumb" src="${max}" onerror="this.onerror=null;this.src='${hq}'" alt="${alt}">`;
-}
-function cardHTML(p){
-  const tags = [...p.tags, ...p.gbb].map(t=>`<span class="tag">${t}</span>`).join("");
-  return `
-    <article class="card">
-      <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
-      <div class="pad">
-        <div class="name">${p.name}（${p.country}）</div>
-        <div class="meta">特徴：${p.features}</div>
-        <div class="tags">${tags}</div>
-        <div class="meta" style="margin-top:.4rem">${p.comment}</div>
-      </div>
-    </article>`;
-}
-
-/* ---- Filter + render ---- */
-function normalize(x){return (x||"").toLowerCase();}
-function render(){
-  const term = normalize(q.value);
-  const out = DATA.filter(p=>{
-    if(selCountry!=="All" && p.country!==selCountry) return false;
-    if(selGBB!=="All" && !p.gbb.includes(selGBB)) return false;
-    if(term){
-      const hay = normalize([p.name,p.country,p.features,p.tags.join(" "),p.gbb.join(" ")].join(" "));
-      if(!hay.includes(term)) return false;
+    function makeButtons(container, items, selected, onClick){
+      container.innerHTML = items.map(v=>`<button class="${v===selected?'active':''}" data-v="${v}">${v}</button>`).join("");
+      container.querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>onClick(b.dataset.v)));
     }
-    return true;
-  });
-  list.innerHTML = out.map(cardHTML).join("");
-}
-q.addEventListener("input", render);
-$("#clearBtn").addEventListener("click", ()=>{ q.value=""; render(); });
-$("#resetBtn").addEventListener("click", ()=>{ selCountry="All"; selGBB="All"; q.value=""; refreshMenus(); render(); });
-render();
+    function refreshMenus(){
+      makeButtons(navCountry, countries, selCountry, v=>{ selCountry=v; refreshMenus(); render(); });
+      makeButtons(navGBB, gbbYears, selGBB, v=>{ selGBB=v; refreshMenus(); render(); });
+    }
+    refreshMenus();
 
-/* ---- Play video ---- */
-function playVideo(id, el){
-  el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-}
-window.playVideo = playVideo;
+    // --- cards
+    function thumbHTML(id, alt){
+      const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+      const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+      return `<img class="thumb" src="${max}" onerror="this.onerror=null;this.src='${hq}'" alt="${alt}">`;
+    }
+    function cardHTML(p){
+      const tags = [...p.tags, ...p.gbb].map(t=>`<span class="tag">${t}</span>`).join("");
+      return `
+        <article class="card">
+          <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
+          <div class="pad">
+            <div class="name">${p.name}（${p.country}）</div>
+            <div class="meta">特徴：${p.features}</div>
+            <div class="tags">${tags}</div>
+            <div class="meta" style="margin-top:.4rem">${p.comment}</div>
+          </div>
+        </article>`;
+    }
 
-/* ---- Mobile drawer ---- */
-const sidebar = $("#sidebar");
-const scrim = $("#scrim");
-$("#menuBtn").addEventListener("click", ()=>{ sidebar.classList.add("open"); scrim.classList.add("show"); });
-scrim.addEventListener("click", ()=>{ sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+    // --- render
+    function normalize(x){return (x||"").toLowerCase();}
+    function render(){
+      const term = normalize(q.value);
+      const out = DATA.filter(p=>{
+        if(selCountry!=="All" && p.country!==selCountry) return false;
+        if(selGBB!=="All" && !p.gbb.includes(selGBB)) return false;
+        if(term){
+          const hay = normalize([p.name,p.country,p.features,p.tags.join(" "),p.gbb.join(" ")].join(" "));
+          if(!hay.includes(term)) return false;
+        }
+        return true;
+      });
+      list.innerHTML = out.map(cardHTML).join("");
+    }
+    render(); // ← 最初の描画
+
+    // --- events
+    $("#clearBtn").addEventListener("click", ()=>{ q.value=""; render(); });
+    $("#resetBtn").addEventListener("click", ()=>{ selCountry="All"; selGBB="All"; q.value=""; refreshMenus(); render(); });
+
+    // --- play
+    window.playVideo = (id, el)=>{
+      el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    };
+
+    // --- mobile drawer
+    const sidebar = $("#sidebar"), scrim = $("#scrim");
+    $("#menuBtn").addEventListener("click", ()=>{ sidebar.classList.add("open"); scrim.classList.add("show"); });
+    scrim.addEventListener("click", ()=>{ sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+
+  } catch(e) { showErr(e); }
+});
 </script>
 </body>
 </html>
