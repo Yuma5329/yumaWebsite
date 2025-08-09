@@ -2,19 +2,6 @@
   "slug": "so-so",
   "name": "SO-SO",
   "country": "Japan",
-  "age": null,
-  "bestResult": "",
+  "birthdate": "1999‑10‑13",
   "ytId": "XoicaHc5m4M",
-  "gbb": ["GBB2021"],
-  "tags": ["日本", "ループ", "個性派"],
-  "summary": "独自のサウンドデザインとルーパーで世界的に評価の高い日本のアーティスト。",
-  "basics": [
-    { "label": "国籍", "value": "Japan" },
-    { "label": "年齢", "value": "-" }
-  ],
-  "strengths": ["サウンドデザイン", "展開力", "ルーパー運用"],
-  "videoIds": ["XoicaHc5m4M"],
-  "links": [
-    { "label": "YouTube 検索", "url": "https://www.youtube.com/results?search_query=SO-SO+beatbox" }
-  ]
 }
