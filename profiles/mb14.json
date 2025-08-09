@@ -7,16 +7,14 @@
   "ytId": "mr5j5Q6LvTA",
   "gbb": ["GBB2016"],
   "tags": ["メロディ", "ループ", "ルーパー"],
-  "avatar": "https://i.ytimg.com/vi/LMSlQFVnyvQ/hqdefault.jpg",
   "summary": "ルーパーを駆使したメロディアスな展開で人気のフランスのビートボクサー。",
   "basics": [
     { "label": "国籍", "value": "France" },
     { "label": "年齢", "value": "-" }
   ],
   "strengths": ["ボーカル表現", "コード感", "ループ構築"],
-  "videoIds": ["LMSlQFVnyvQ"],
+  "videoIds": ["mr5j5Q6LvTA"],
   "links": [
     { "label": "YouTube 検索", "url": "https://www.youtube.com/results?search_query=MB14+beatbox" }
-  ],
-  "notes": ""
+  ]
 }
