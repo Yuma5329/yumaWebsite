@@ -8,37 +8,52 @@
 </head>
 <body>
   <div class="layout">
+    <!-- Header -->
     <header>
       <h1>Beatboxer図鑑</h1>
       <input id="q" type="search" placeholder="検索（名前・特徴・タグ）">
       <button id="clearBtn" class="btn">クリア</button>
     </header>
 
+    <!-- Sidebar -->
     <aside id="sidebar" aria-label="サイドメニュー">
       <p class="secTitle">国籍で絞り込み</p>
       <div id="navCountry" class="nav"></div>
-    
+
       <p class="secTitle">GBB年別で絞り込み</p>
       <div id="navGBB" class="nav"></div>
-    
-      <!-- 追加：スタイルで絞り込み -->
+
       <p class="secTitle">スタイルで絞り込み</p>
       <div id="navStyle" class="nav"></div>
-    
+
       <p class="secTitle">選択を解除</p>
       <button id="resetBtn" class="btn" style="width:100%">すべて表示</button>
       <footer>※年は代表動画に基づく暫定タグを含みます。</footer>
     </aside>
 
-
+    <!-- Main -->
     <main>
-      <div id="list" class="grid"></div>
+      <!-- 一覧ビュー -->
+      <section id="listView">
+        <div id="list" class="grid"></div>
+      </section>
+
+      <!-- 詳細ビュー（初期は非表示） -->
+      <section id="detailView" hidden>
+        <nav class="detail-breadcrumb">
+          <button id="backToList" class="btn">← 一覧へ戻る</button>
+        </nav>
+
+        <article id="profile" class="detail">
+          <!-- JSで中身を差し込み -->
+        </article>
+      </section>
     </main>
   </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  /* ==== Data ==== */
+  /* ========= DATA（一覧用） ========= */
   const DATA = [
     {name:"D-Low", country:"UK",     features:"高速・高精度",   tags:["キック","スピード"], gbb:["GBB2019"], ytId:"DFk6aVSWo7s", comment:"多彩な音と圧巻の構成。"},
     {name:"NaPoM", country:"USA",    features:"ベース/グルーヴ", tags:["ベース","バトル","重低音"],   gbb:["GBB2017"], ytId:"YYKMoZnuTJE", comment:"低音の安定感と展開力。"},
@@ -52,18 +67,41 @@ document.addEventListener('DOMContentLoaded', function () {
     {name:"SARUKANI", country:"Japan", features:"クルー",         tags:["日本","チーム","ショーケース"],     gbb:["GBB2022"], ytId:"FvFgxqX2D4E", comment:"連携が魅力の4人組。"}
   ];
 
-  const $ = (q)=>document.querySelector(q);
-  const navCountry = $("#navCountry");
-  const navGBB = $("#navGBB");
-  const navStyle = $("#navStyle");
-  const q = $("#q");
-  const list = $("#list");
+  /* ========= PROFILE（詳細用：まずは D-Low のみ） =========
+     ※事実関係は後で編集できるようプレースホルダーも可。
+  */
+  const PROFILES = {
+    "dlow": {
+      name: "D-Low",
+      country: "UK",
+      avatar: `https://i.ytimg.com/vi/DFk6aVSWo7s/hqdefault.jpg`,
+      summary: "高速コンボと正確なキックで知られるUKのビートボクサー。",
+      basics: [
+        {label:"国籍", value:"UK"},
+        {label:"代表大会", value:"GBB 2019 ほか（※要編集）"},
+        {label:"年齢 / 生年", value:"未設定（後で追記）"}
+      ],
+      strengths: ["キックの精度","複雑なコンボ","展開の速さ"],
+      videoIds: ["DFk6aVSWo7s","YYKMoZnuTJE"],  // 2つ目は例
+      links: [
+        {label:"YouTube 検索", url:"https://www.youtube.com/results?search_query=D-Low+beatbox"},
+        {label:"Instagram（例）", url:"#"}
+      ],
+      notes: "ここに解説や魅力、代表的な技など自由記述で追記してください。"
+    }
+  };
 
-  /* ---- Menus ---- */
+  /* ========= 共通ユーティリティ ========= */
+  const $ = (q)=>document.querySelector(q);
+  const listEl = $("#list");
+  const listView = $("#listView");
+  const detailView = $("#detailView");
+  const profileEl = $("#profile");
+  const qEl = $("#q");
+  const navCountry = $("#navCountry"), navGBB = $("#navGBB"), navStyle = $("#navStyle");
+
   const countries = ["All", ...Array.from(new Set(DATA.map(d=>d.country)))];
   const gbbYears  = ["All", ...Array.from(new Set(DATA.flatMap(d=>d.gbb)))].sort();
-
-  // スタイル（独断で大量追加。DATAのタグも結合してユニーク化）
   const curatedStyles = [
     "All","キック","スピード","ベース","重低音","バトル","基礎","構成","構成美","アート","実験",
     "メロディ","ループ","ルーパー","チーム","レジェンド","ショーケース","メロ×ベース","グルーヴ",
@@ -71,25 +109,23 @@ document.addEventListener('DOMContentLoaded', function () {
     "リップロール","インワードベース","トランジション","高速","低音特化","クラブ向け","ポップス",
     "ハウス","テクノ","ドラムンベース","トラップ","ダブステップ"
   ];
-  const styles = Array.from(new Set([
-    ...curatedStyles,
-    ...DATA.flatMap(d=>d.tags||[])
-  ]));
+  const styles = Array.from(new Set([...curatedStyles, ...DATA.flatMap(d=>d.tags||[])]));
 
-  let selCountry = "All", selGBB = "All", selStyle = "All";
+  let selCountry="All", selGBB="All", selStyle="All";
+
+  const slug = s => s.toLowerCase().replace(/\s+/g,'').replace(/[^a-z0-9\-]/g,'');
 
   function makeButtons(container, items, selected, onClick){
     container.innerHTML = items.map(v=>`<button class="${v===selected?'active':''}" data-v="${v}">${v}</button>`).join("");
     container.querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>onClick(b.dataset.v)));
   }
   function refreshMenus(){
-    makeButtons(navCountry, countries, selCountry, v=>{ selCountry=v; refreshMenus(); render(); });
-    makeButtons(navGBB, gbbYears, selGBB, v=>{ selGBB=v; refreshMenus(); render(); });
-    makeButtons(navStyle,  styles,    selStyle,  v=>{ selStyle =v; refreshMenus(); render(); });
+    makeButtons(navCountry, countries, selCountry, v=>{ selCountry=v; refreshMenus(); renderList(); });
+    makeButtons(navGBB, gbbYears,  selGBB,    v=>{ selGBB=v;    refreshMenus(); renderList(); });
+    makeButtons(navStyle,  styles,  selStyle,  v=>{ selStyle=v;  refreshMenus(); renderList(); });
   }
-  refreshMenus();
 
-  /* ---- Cards ---- */
+  /* ========= 一覧描画 ========= */
   function thumbHTML(id, alt){
     const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
@@ -97,22 +133,23 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function cardHTML(p){
     const tags = [...p.tags, ...p.gbb].map(t=>`<span class="tag">${t}</span>`).join("");
+    const id = slug(p.name);
     return `
       <article class="card">
         <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
         <div class="pad">
-          <div class="name">${p.name}（${p.country}）</div>
+          <div class="name">
+            <a href="#p=${id}" class="link-to-detail">${p.name}</a>（${p.country}）
+          </div>
           <div class="meta">特徴：${p.features}</div>
           <div class="tags">${tags}</div>
           <div class="meta" style="margin-top:.4rem">${p.comment}</div>
         </div>
       </article>`;
   }
-
-  /* ---- Filter + render ---- */
   function normalize(x){return (x||"").toLowerCase();}
-  function render(){
-    const term = normalize(q.value);
+  function renderList(){
+    const term = normalize(qEl.value);
     const out = DATA.filter(p=>{
       if(selCountry!=="All" && p.country!==selCountry) return false;
       if(selGBB!=="All" && !p.gbb.includes(selGBB)) return false;
@@ -123,16 +160,86 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       return true;
     });
-    list.innerHTML = out.map(cardHTML).join("");
+    listEl.innerHTML = out.map(cardHTML).join("");
   }
-  render();
 
-  $("#clearBtn").addEventListener("click", ()=>{ q.value=""; render(); });
-  $("#resetBtn").addEventListener("click", ()=>{ selCountry="All"; selGBB="All"; selStyle="All"; q.value=""; refreshMenus(); render(); });
+  /* ========= 詳細描画 ========= */
+  function iframe(id){return `<iframe src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`}
+  function detailHTML(p){
+    const basics = (p.basics||[]).map(b=>`<div><span>${b.label}</span><strong>${b.value}</strong></div>`).join("");
+    const strength = (p.strengths||[]).map(s=>`<span class="tag">${s}</span>`).join("");
+    const videos = (p.videoIds||[]).map(v=>`<div class="detail-video">${iframe(v)}</div>`).join("");
+    const links = (p.links||[]).map(l=>`<a class="btn link-ghost" href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a>`).join("");
 
+    return `
+      <header class="detail-head">
+        <img class="detail-avatar" src="${p.avatar}" alt="${p.name}">
+        <div class="detail-title">
+          <h2>${p.name}</h2>
+          <div class="meta">${p.summary||""}</div>
+        </div>
+      </header>
+
+      <section class="detail-section">
+        <h3>基本情報</h3>
+        <div class="detail-basics">${basics}</div>
+      </section>
+
+      <section class="detail-section">
+        <h3>特徴</h3>
+        <div class="tags">${strength}</div>
+      </section>
+
+      <section class="detail-section">
+        <h3>代表動画</h3>
+        <div class="detail-videos">${videos}</div>
+      </section>
+
+      <section class="detail-section">
+        <h3>リンク</h3>
+        <div class="detail-links">${links}</div>
+      </section>
+
+      <section class="detail-section">
+        <h3>メモ</h3>
+        <p class="meta">${p.notes||"未入力"}</p>
+      </section>
+    `;
+  }
+
+  function showList(){
+    detailView.hidden = true;
+    listView.hidden = false;
+  }
+  function showDetailBySlug(s){
+    const p = PROFILES[s];
+    if(!p){ showList(); return; }
+    profileEl.innerHTML = detailHTML(p);
+    listView.hidden = true;
+    detailView.hidden = false;
+  }
+
+  /* ========= ルーティング（#p=slug） ========= */
+  function routeFromHash(){
+    const m = location.hash.match(/p=([a-z0-9\-]+)/i);
+    if(m){ showDetailBySlug(m[1].toLowerCase()); }
+    else { showList(); }
+  }
+  window.addEventListener('hashchange', routeFromHash);
+
+  /* ========= 再生埋め込み（一覧サムネのクリック） ========= */
   window.playVideo = (id, el)=>{
     el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
   };
+
+  /* ========= 初期描画 ========= */
+  $("#clearBtn").addEventListener("click", ()=>{ qEl.value=""; renderList(); });
+  $("#resetBtn").addEventListener("click", ()=>{ selCountry="All"; selGBB="All"; selStyle="All"; qEl.value=""; refreshMenus(); renderList(); });
+  $("#backToList").addEventListener("click", ()=>{ history.pushState(null,"",location.pathname+location.search); routeFromHash(); });
+
+  refreshMenus();
+  renderList();
+  routeFromHash(); // ハッシュ直リンク対応
 });
 </script>
 </body>
