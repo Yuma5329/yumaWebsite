@@ -122,17 +122,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- 一覧描画 ---------- */
   function cardHTML(p){
-    const tags = [...(p.tags||[]), ...(p.gbb||[])].map(t=>`<span class="tag">${t}</span>`).join("");
+    // 年齢と最高戦績は存在する時だけ出す
+    const ageLine  = (p.age !== undefined && p.age !== null && p.age !== "")
+      ? `<span class="stat"><b>年齢：</b>${p.age}</span>` : "";
+    const bestLine = p.bestResult
+      ? `<span class="stat"><b>最高戦績：</b>${p.bestResult}</span>` : "";
+  
     return `
       <article class="card">
         <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
         <div class="pad">
-          <div class="name"><a href="#p=${p.slug}" class="link-to-detail">${p.name}</a>（${p.country}）</div>
-          <div class="meta">${p.comment||""}</div>
-          <div class="tags">${tags}</div>
+          <div class="name">
+            <a href="#p=${p.slug}" class="link-to-detail">${p.name}</a>（${p.country}）
+          </div>
+          <div class="stats">
+            ${ageLine}
+            ${bestLine}
+          </div>
         </div>
       </article>`;
   }
+
   function renderList(){
     const term = normalize(qEl.value);
     const out = LIST.filter(p=>{
