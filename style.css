@@ -131,3 +131,9 @@ footer{color:var(--muted);font-size:.85rem;margin:1rem 0}
   .toolbar{ grid-template-columns: 1fr 1fr; }
 }
 
+.stats {
+  display: flex;
+  flex-direction: column; /* 縦並び強制 */
+  gap: 0.25rem; /* 行間 */
+}
+
