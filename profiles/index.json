@@ -1,11 +1,25 @@
 {
   "list": [
     {
+      "slug": "d-low",
+      "name": "D-Low",
+      "country": "UK",
+      "ytId": "DFk6aVSWo7s",
+      "birthdate": "1998-10-10"
+    },
+    {
       "slug": "napom",
       "name": "NaPoM",
       "country": "USA",
       "ytId": "YYKMoZnuTJE",
       "birthdate": "1996-08-09"
+    },
+    {
+      "slug": "so-so",
+      "name": "SO-SO",
+      "country": "Japan",
+      "ytId": "XoicaHc5m4M",
+      "birthdate": "1999‑10‑13"
     }
   ]
 }
