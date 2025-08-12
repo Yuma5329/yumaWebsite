@@ -91,7 +91,6 @@ main{
   padding:.8rem .2rem;
   margin:0 0 calc(var(--gap)*1.6);
   background: color-mix(in oklab, var(--bg) 98%, transparent);
-  border-bottom:1px solid var(--border-soft);
 }
 .ctl{ display:flex; flex-direction:column; gap:.35rem; }
 .ctl > span{ font-size:.85rem; color:var(--muted); }
