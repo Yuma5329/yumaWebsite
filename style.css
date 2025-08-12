@@ -20,7 +20,7 @@ body{
 
 /* Scrollbar（控えめ） */
 *{scrollbar-color:#3a4352 transparent; scrollbar-width:thin}
-aside#sidebar:hover, main:hover { scrollbar-color:#556176 transparent; }
+main:hover { scrollbar-color:#556176 transparent; }
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{
@@ -64,8 +64,15 @@ aside#sidebar{
   background:var(--card);
   padding:clamp(.6rem,1.2vw,.9rem);
   position:sticky; top:var(--headerH);
-  align-self:stretch; height:calc(100vh - var(--headerH));
-  overflow-y:auto; border-right:1px solid var(--border-soft)
+  align-self:stretch;
+  height:calc(100vh - var(--headerH));
+  /* overflow-y:auto;  ←消す */
+  /* 横線用のボーダーはそのままでもOK */
+  border-right:1px solid var(--border-soft);
+
+  /* 追加：スクロール完全に無効化 */
+  overflow: hidden;            /* ←縦横とも非表示に */
+  /* overflow-x:hidden; overflow-y:hidden; でも可 */
 }
 .menu { display:flex; flex-direction:column; gap:.5rem; }
 .menu-item{
