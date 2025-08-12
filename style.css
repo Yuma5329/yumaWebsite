@@ -68,7 +68,12 @@ aside#sidebar{
   border-right:1px solid var(--border-soft);
   overflow:hidden;
 }
-.menu { display:flex; flex-direction:column; gap:.5rem; }
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding-right: .4rem; /* ← 右端の見切れ防止 */
+}
 .menu-item{
   all: unset;
   box-sizing: border-box;   /* ←これを追加！ */
