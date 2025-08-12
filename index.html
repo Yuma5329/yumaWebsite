@@ -102,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /** 生年月日(YYYY-MM-DD) → 年齢（整数） */
-// これに差し替え
 function calcAge(birthdate, asOf = new Date()){
   if (!birthdate) return undefined;
   // どんな区切り（全角/半角ハイフン、スラッシュ、ドット、空白）でも許容
@@ -202,34 +201,53 @@ function calcAge(birthdate, asOf = new Date()){
     listEl.innerHTML = out.map(cardHTML).join("");
   }
 
-  /* ---------- 詳細描画（最小構成） ---------- */
   function detailHTML(p){
     const age = calcAge(p.birthdate);
-    const blocks = [];
-    if (p.country)   blocks.push(`<div><span>国籍</span><strong>${p.country}</strong></div>`);
-    if (p.birthdate) blocks.push(`<div><span>生年月日</span><strong>${p.birthdate}</strong></div>`);
-    if (Number.isFinite(age)) blocks.push(`<div><span>年齢</span><strong>${age}</strong></div>`);
-
-    const basicSection = blocks.length
+    const ageLine = Number.isFinite(age) ? `<div><span>年齢</span><strong>${age}</strong></div>` : "";
+    const bdLine  = (p.birthdate && /\d/.test(p.birthdate)) ? `<div><span>生年月日</span><strong>${p.birthdate}</strong></div>` : "";
+    const countryLine = p.country ? `<div><span>国籍</span><strong>${p.country}</strong></div>` : "";
+  
+    // --- SNS（任意、存在するものだけ並べる） ---
+    const s = p.socials || {};
+    const snsItems = [
+      s.x         ? `<a href="${s.x}" class="sns x" target="_blank" rel="noopener">X</a>` : "",
+      s.instagram ? `<a href="${s.instagram}" class="sns ig" target="_blank" rel="noopener">Instagram</a>` : "",
+      s.youtube   ? `<a href="${s.youtube}" class="sns yt" target="_blank" rel="noopener">YouTube</a>` : "",
+      s.tiktok    ? `<a href="${s.tiktok}" class="sns tk" target="_blank" rel="noopener">TikTok</a>` : "",
+      s.website   ? `<a href="${s.website}" class="sns web" target="_blank" rel="noopener">Website</a>` : ""
+    ].filter(Boolean).join("");
+  
+    const snsBlock = snsItems
       ? `<section class="detail-section">
-           <h3>基本情報</h3>
-           <div class="detail-basics">${blocks.join("")}</div>
+           <h3>SNS</h3>
+           <div class="detail-sns">${snsItems}</div>
          </section>`
       : "";
-
-    const videoSection = p.ytId
+  
+    const videoBlock = p.ytId
       ? `<section class="detail-section">
            <h3>代表動画</h3>
-           <div class="detail-videos"><div class="detail-video">${iframe(p.ytId)}</div></div>
+           <div class="detail-videos">
+             <div class="detail-video">${iframe(p.ytId)}</div>
+           </div>
          </section>`
       : "";
-
+  
+    const basicsBlock = (countryLine || bdLine || ageLine)
+      ? `<section class="detail-section">
+           <h3>基本情報</h3>
+           <div class="detail-basics">${countryLine}${bdLine}${ageLine}</div>
+         </section>` : "";
+  
     return `
       <header class="detail-head">
-        <div class="detail-title"><h2>${p.name || ""}</h2></div>
+        <div class="detail-title">
+          <h2>${p.name || ""}</h2>
+        </div>
       </header>
-      ${basicSection}
-      ${videoSection}
+      ${basicsBlock}
+      ${snsBlock}
+      ${videoBlock}
     `;
   }
 
