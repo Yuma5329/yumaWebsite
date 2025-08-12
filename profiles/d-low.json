@@ -3,5 +3,8 @@
   "name": "D-Low",
   "country": "UK",
   "ytId": "DFk6aVSWo7s",
-  "birthdate": "1998-10-10"
+  "birthdate": "1998-10-10",
+  "socials": {
+    "youtube": "www.youtube.com/@Dlowmusic"
+  }
 }
