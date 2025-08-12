@@ -1,11 +1,7 @@
-// tools/importProfiles.js
+// tools/importProfiles.js（CSV専用・SNS対応）
 // CSV から profiles/*.json を一括生成し、profiles/index.json も更新します。
-// 使い方: node tools/importProfiles.js  （GitHub Actions からも同じ）
-//
-// 入力: tools/profiles.csv
-// 必須列: name, country, ytId
-// 任意列: slug, birthdate(YYYY-MM-DD または 2020/1/2 など)
-// 備考: slug が無ければ name から自動生成。ytId はURLでもOK。
+// 必須: name, country, ytId
+// 任意: slug, birthdate, x, instagram, youtube, tiktok, website
 
 const fs = require("fs");
 const path = require("path");
@@ -31,7 +27,6 @@ function toISODate(input) {
   if (!input) return undefined;
   const str = String(input).trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-  // 2020/1/2, 2020.01.02 → 2020-01-02
   const s = str.replace(/[.\/]/g, "-");
   const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if (m) {
@@ -57,53 +52,33 @@ function extractYouTubeId(v) {
   return v;
 }
 
-/** シンプルCSVパーサ（RFC4180相当：ダブルクォート対応） */
+/** 簡易CSVパーサ（ダブルクォート対応） */
 function parseCSV(text) {
   const rows = [];
   let row = [];
   let cell = "";
   let inQuotes = false;
-
-  // 統一改行
   const s = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
     if (inQuotes) {
       if (c === '"') {
-        if (s[i + 1] === '"') {
-          cell += '"';
-          i++; // 連続二重引用 → エスケープ
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        cell += c;
-      }
+        if (s[i + 1] === '"') { cell += '"'; i++; }
+        else { inQuotes = false; }
+      } else { cell += c; }
     } else {
-      if (c === '"') {
-        inQuotes = true;
-      } else if (c === ",") {
-        row.push(cell);
-        cell = "";
-      } else if (c === "\n") {
-        row.push(cell);
-        rows.push(row);
-        row = [];
-        cell = "";
-      } else {
-        cell += c;
-      }
+      if (c === '"') inQuotes = true;
+      else if (c === ",") { row.push(cell); cell = ""; }
+      else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
+      else { cell += c; }
     }
   }
-  // 末尾セル・行
-  row.push(cell);
-  rows.push(row);
+  row.push(cell); rows.push(row);
 
-  // ヘッダ → オブジェクト配列
   const header = rows.shift().map(h => String(h || "").trim());
   return rows
-    .filter(r => r.some(v => String(v).trim() !== "")) // 空行除去
+    .filter(r => r.some(v => String(v).trim() !== ""))
     .map(r => {
       const obj = {};
       header.forEach((h, idx) => (obj[h] = r[idx] !== undefined ? String(r[idx]).trim() : ""));
@@ -122,10 +97,7 @@ function parseCSV(text) {
 
   const csvText = fs.readFileSync(SRC_CSV, "utf8");
   const rows = parseCSV(csvText);
-  if (!rows.length) {
-    console.log("入力に行がありません。終了。");
-    return;
-  }
+  if (!rows.length) { console.log("入力に行がありません。終了。"); return; }
 
   const list = [];
   const created = [];
@@ -147,16 +119,26 @@ function parseCSV(text) {
     const ytId = extractYouTubeId(ytRaw);
     const birthdate = toISODate(raw.birthdate || "");
 
-    // 個別JSON（最小）
+    // --- SNS（任意） ---
+    const socials = {};
+    if (raw.x)         socials.x = raw.x.trim();
+    if (raw.instagram) socials.instagram = raw.instagram.trim();
+    if (raw.youtube)   socials.youtube = raw.youtube.trim();
+    if (raw.tiktok)    socials.tiktok = raw.tiktok.trim();
+    if (raw.website)   socials.website = raw.website.trim();
+    const hasSocials = Object.keys(socials).length > 0;
+
+    // 個別JSON
     const profile = { slug, name, country, ytId };
     if (birthdate) profile.birthdate = birthdate;
+    if (hasSocials) profile.socials = socials;
 
     const outfile = path.join(OUT_DIR, `${slug}.json`);
     const exists = fs.existsSync(outfile);
     fs.writeFileSync(outfile, JSON.stringify(profile, null, 2) + "\n", "utf8");
     exists ? updated.push(slug) : created.push(slug);
 
-    // index用
+    // index用（最小）
     const idx = { slug, name, country, ytId };
     if (birthdate) idx.birthdate = birthdate;
     list.push(idx);
