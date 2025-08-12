@@ -70,13 +70,14 @@ aside#sidebar{
 }
 .menu { display:flex; flex-direction:column; gap:.5rem; }
 .menu-item{
-  all:unset;
-  display:block;
-  width:100%;
-  padding:.6rem .8rem;
-  border-radius:var(--radius);
-  cursor:pointer;
-  background:var(--card);
+  all: unset;
+  box-sizing: border-box;   /* ←これを追加！ */
+  display: block;
+  width: 100%;
+  padding: .6rem .8rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  background: var(--card);
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
