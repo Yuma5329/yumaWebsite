@@ -138,3 +138,24 @@ main{
 
 /* A11y */
 :focus-visible{ outline:2px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset:2px }
+
+/* SNS buttons */
+.detail-sns{
+  display:flex; flex-wrap:wrap; gap:.5rem;
+}
+.detail-sns .sns{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:.5rem .75rem; border:1px solid var(--border);
+  border-radius:999px; background:#12161e; color:var(--fg);
+  font-size:.9rem; text-decoration:none; transition:background .15s,border-color .15s,transform .02s;
+}
+.detail-sns .sns:hover{ background:#171c25; border-color:#303a49 }
+.detail-sns .sns:active{ transform:translateY(1px) }
+
+/* ちょい差別化（任意） */
+.detail-sns .sns.yt { color:#e6e9ef; }
+.detail-sns .sns.ig { color:#e6e9ef; }
+.detail-sns .sns.x  { color:#e6e9ef; }
+.detail-sns .sns.tk { color:#e6e9ef; }
+.detail-sns .sns.web{ color:#e6e9ef; }
+
