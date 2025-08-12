@@ -1,6 +1,13 @@
 {
   "list": [
     {
+      "slug": "codfish",
+      "name": "Codfish",
+      "country": "Australia",
+      "ytId": "6TQh-p4gWB8",
+      "birthdate": "1998-03-27"
+    },
+    {
       "slug": "d-low",
       "name": "D-Low",
       "country": "UK",
@@ -15,11 +22,25 @@
       "birthdate": "1999-02-07"
     },
     {
+      "slug": "mb14",
+      "name": "MB14",
+      "country": "France",
+      "ytId": "LMSlQFVnyvQ",
+      "birthdate": "1994-06-19"
+    },
+    {
       "slug": "napom",
       "name": "NaPoM",
       "country": "USA",
       "ytId": "YYKMoZnuTJE",
       "birthdate": "1996-08-09"
+    },
+    {
+      "slug": "reeps-one",
+      "name": "Reeps One",
+      "country": "UK",
+      "ytId": "Xj6rAa3G7Hc",
+      "birthdate": "1989-11-18"
     },
     {
       "slug": "showgo",
@@ -34,6 +55,13 @@
       "country": "Japan",
       "ytId": "XoicaHc5m4M",
       "birthdate": "1999-10-13"
+    },
+    {
+      "slug": "tom-thum",
+      "name": "Tom Thum",
+      "country": "Australia",
+      "ytId": "GNZBSZD16cY",
+      "birthdate": "1985-04-02"
     },
     {
       "slug": "wing",
