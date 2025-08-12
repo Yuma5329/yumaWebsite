@@ -3,5 +3,10 @@
   "name": "Hiss",
   "country": "South Korea",
   "ytId": "OTlkpNmQq_s",
-  "birthdate": "1999-02-07"
+  "birthdate": "1999-02-07",
+  "socials": {
+    "x": "https://twitter.com/beatbox_hiss",
+    "instagram": "https://www.instagram.com/beatboxhiss/",
+    "youtube": "https://www.youtube.com/@HissBeatbox"
+  }
 }

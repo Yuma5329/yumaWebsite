@@ -3,5 +3,12 @@
   "name": "NaPoM",
   "country": "USA",
   "ytId": "YYKMoZnuTJE",
-  "birthdate": "1996-08-09"
+  "birthdate": "1996-08-09",
+  "socials": {
+    "x": "https://x.com/lifeisnapom",
+    "instagram": "https://www.instagram.com/napom_official/",
+    "youtube": "https://www.youtube.com/@NaPoMBeatbox",
+    "tiktok": "https://www.tiktok.com/@napom_official",
+    "website": "https://napombeatbox.com/"
+  }
 }

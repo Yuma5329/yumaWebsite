@@ -3,5 +3,11 @@
   "name": "SHOW-GO",
   "country": "Japan",
   "ytId": "eg9_ymCEAF8",
-  "birthdate": "1999-05-07"
+  "birthdate": "1999-05-07",
+  "socials": {
+    "x": "https://x.com/showgo_beatbox",
+    "instagram": "https://www.instagram.com/showgoxkaix/",
+    "youtube": "https://www.youtube.com/@SHOWGO",
+    "tiktok": "https://www.tiktok.com/@showgoxkaix"
+  }
 }

@@ -3,5 +3,10 @@
   "name": "SO-SO",
   "country": "Japan",
   "ytId": "XoicaHc5m4M",
-  "birthdate": "1999-10-13"
+  "birthdate": "1999-10-13",
+  "socials": {
+    "instagram": "https://www.instagram.com/sosobeatbox/",
+    "youtube": "https://www.youtube.com/@SOSObeatbox",
+    "website": "https://x.com/SO_SO_LOOPER"
+  }
 }
