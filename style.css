@@ -75,12 +75,30 @@ aside#sidebar{
   /* overflow-x:hidden; overflow-y:hidden; でも可 */
 }
 .menu { display:flex; flex-direction:column; gap:.5rem; }
+/* メニューアイテム：テキストは必ず折り返す */
 .menu-item{
-  all:unset; display:block; width:100%;
-  padding:.6rem .8rem; border:1px solid var(--border);
-  border-radius:var(--radius); cursor:pointer; background:var(--card);
+  all:unset;
+  display:block;
+  width:100%;
+  padding:.6rem .8rem;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  cursor:pointer;
+  background:var(--card);
+
+  /* 追加：長い文字でも見切れない */
+  white-space: normal;           /* 1行固定をやめる */
+  overflow-wrap: anywhere;       /* 必要ならどこでも改行 */
+  word-break: break-word;        /* 単語長すぎ対策 */
 }
-.menu-item.active{ outline:2px solid var(--accent); }
+
+/* アクティブ強調：outline をやめて内側の box-shadow に */
+.menu-item.active{
+  /* outline:2px solid var(--accent);  ←削除 */
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent) inset;
+  /* 内側に描くので overflow:hidden でも切れません */
+}
 .menu-note{ color:var(--muted); font-size:.9rem; margin:1rem 0; }
 
 /* Main */
