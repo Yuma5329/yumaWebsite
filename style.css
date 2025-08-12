@@ -15,10 +15,10 @@ body{
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   background:var(--bg); color:var(--fg);
-  overflow:hidden; /* サイド/メインだけ縦スクロール */
+  overflow:hidden;
 }
 
-/* Scrollbar（控えめ） */
+/* Scrollbar */
 *{scrollbar-color:#3a4352 transparent; scrollbar-width:thin}
 main:hover { scrollbar-color:#556176 transparent; }
 ::-webkit-scrollbar{width:8px;height:8px}
@@ -26,7 +26,6 @@ main:hover { scrollbar-color:#556176 transparent; }
 ::-webkit-scrollbar-thumb{
   background:#3a4352;border-radius:999px;border:2px solid transparent;background-clip:content-box
 }
-aside#sidebar:hover::-webkit-scrollbar-thumb,
 main:hover::-webkit-scrollbar-thumb{background:#596477}
 aside#sidebar,main{scrollbar-gutter:stable}
 
@@ -49,7 +48,7 @@ header{
 }
 h1{margin:0; font-size:clamp(1.1rem,2.2vw,1.4rem); font-weight:700; letter-spacing:.02em}
 
-/* Buttons（戻るボタン等） */
+/* Buttons */
 .btn{
   padding:.65rem .9rem; border:1px solid var(--border); border-radius:var(--radius);
   background:var(--card); color:var(--fg); cursor:pointer;
@@ -58,7 +57,7 @@ h1{margin:0; font-size:clamp(1.1rem,2.2vw,1.4rem); font-weight:700; letter-spaci
 .btn:hover{background:#1a202a;border-color:#2b3341}
 .btn:active{transform:translateY(1px)}
 
-/* Sidebar（メニューのみ） */
+/* Sidebar */
 aside#sidebar{
   grid-column:1; grid-row:2;
   background:var(--card);
@@ -66,38 +65,29 @@ aside#sidebar{
   position:sticky; top:var(--headerH);
   align-self:stretch;
   height:calc(100vh - var(--headerH));
-  /* overflow-y:auto;  ←消す */
-  /* 横線用のボーダーはそのままでもOK */
   border-right:1px solid var(--border-soft);
-
-  /* 追加：スクロール完全に無効化 */
-  overflow: hidden;            /* ←縦横とも非表示に */
-  /* overflow-x:hidden; overflow-y:hidden; でも可 */
+  overflow:hidden;
 }
 .menu { display:flex; flex-direction:column; gap:.5rem; }
-/* メニューアイテム：テキストは必ず折り返す */
 .menu-item{
   all:unset;
   display:block;
   width:100%;
   padding:.6rem .8rem;
-  border:1px solid var(--border);
   border-radius:var(--radius);
   cursor:pointer;
   background:var(--card);
-
-  /* 追加：長い文字でも見切れない */
-  white-space: normal;           /* 1行固定をやめる */
-  overflow-wrap: anywhere;       /* 必要ならどこでも改行 */
-  word-break: break-word;        /* 単語長すぎ対策 */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  transition: background .15s;
 }
-
-/* アクティブ強調：outline をやめて内側の box-shadow に */
+.menu-item:hover{
+  background: #1e232c;
+}
 .menu-item.active{
-  /* outline:2px solid var(--accent);  ←削除 */
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent) inset;
-  /* 内側に描くので overflow:hidden でも切れません */
+  background: #e5e7eb; /* ChatGPT風 背景色 */
+  color: #000;
 }
 .menu-note{ color:var(--muted); font-size:.9rem; margin:1rem 0; }
 
@@ -125,7 +115,7 @@ main{
 }
 @media (max-width:900px){ .toolbar{ grid-template-columns:1fr 1fr; } }
 
-/* ===== Grid（一覧カード） ===== */
+/* ===== Grid ===== */
 .grid{display:grid; gap:var(--gap)}
 @media (min-width:1200px){.grid{grid-template-columns:repeat(4,1fr)}}
 @media (min-width:900px) and (max-width:1199px){.grid{grid-template-columns:repeat(3,1fr)}}
@@ -143,11 +133,11 @@ main{
 .pad{ padding:clamp(.65rem,1.2vw,.9rem) }
 .name{ margin:.15em 0 .6em; font-size:clamp(1rem,1.6vw,1.2rem); font-weight:650; letter-spacing:.01em }
 
-/* カード内の統計（年齢/最高戦績など） */
+/* Stats */
 .stats{ display:flex; flex-direction:column; gap:.25rem; color:var(--muted); font-size:clamp(.85rem,1.2vw,.95rem) }
 .stats .stat b{ font-weight:600; color:var(--fg) }
 
-/* ===== Detail（最小構成） ===== */
+/* Detail */
 .detail{ display:grid; gap:1rem }
 .detail-head{ display:flex; align-items:center; gap:1rem; padding:.6rem 0; border-bottom:1px solid var(--border-soft) }
 .detail-title h2{ margin:0; font-size:clamp(1.2rem,2vw,1.5rem) }
@@ -158,9 +148,6 @@ main{
 .detail-basics span{ color:var(--muted); margin-right:.4rem }
 .detail-videos{ display:grid; gap:.8rem }
 .detail-video iframe{ width:100%; aspect-ratio:16/9; border:0; background:#000 }
-
-/* A11y */
-:focus-visible{ outline:2px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset:2px }
 
 /* SNS buttons */
 .detail-sns{
@@ -174,11 +161,8 @@ main{
 }
 .detail-sns .sns:hover{ background:#171c25; border-color:#303a49 }
 .detail-sns .sns:active{ transform:translateY(1px) }
-
-/* ちょい差別化（任意） */
-.detail-sns .sns.yt { color:#e6e9ef; }
-.detail-sns .sns.ig { color:#e6e9ef; }
-.detail-sns .sns.x  { color:#e6e9ef; }
-.detail-sns .sns.tk { color:#e6e9ef; }
+.detail-sns .sns.yt,
+.detail-sns .sns.ig,
+.detail-sns .sns.x,
+.detail-sns .sns.tk,
 .detail-sns .sns.web{ color:#e6e9ef; }
-
