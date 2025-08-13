@@ -172,3 +172,13 @@ main{
 .detail-sns .sns.x,
 .detail-sns .sns.tk,
 .detail-sns .sns.web{ color:#e6e9ef; }
+
+.card{ position:relative; }
+.fav-btn{
+  position:absolute; top:.5rem; right:.5rem;
+  width:2.1rem; height:2.1rem;
+  border:1px solid var(--border); border-radius:999px;
+  background:#12161e; color:#ffd66b; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.fav-btn.on{ background:#1e2230; border-color:#3a4253; }
