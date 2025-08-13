@@ -37,17 +37,17 @@
             <span>国籍</span>
             <select id="filterCountry"></select>
           </label>
-
+        
           <label class="ctl">
             <span>年齢（最小）</span>
             <input id="ageMin" type="number" inputmode="numeric" placeholder="任意">
           </label>
-
+        
           <label class="ctl">
             <span>年齢（最大）</span>
             <input id="ageMax" type="number" inputmode="numeric" placeholder="任意">
           </label>
-
+        
           <label class="ctl">
             <span>並び替え</span>
             <select id="sortBy">
@@ -55,6 +55,9 @@
               <option value="name-desc">名前：Z → A</option>
             </select>
           </label>
+        
+          <!-- 追加：お気に入りのみ表示トグル -->
+          <button id="favOnlyBtn" type="button" class="toggle fav">☆ お気に入りのみ</button>
         </div>
 
         <div id="list" class="grid"></div>
