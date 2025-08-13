@@ -106,13 +106,32 @@ main{
 }
 
 /* ===== Toolbar ===== */
+/* 既存 .toolbar をこれに置換（可変カラム） */
 .toolbar{
-  display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+  display:grid;
+  /* ← ここを可変に：項目が増えても自動で折り返し */
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap:var(--gap);
   padding:.8rem .2rem;
   margin:0 0 calc(var(--gap)*1.6);
   background: color-mix(in oklab, var(--bg) 98%, transparent);
 }
+
+/* 追加：お気に入りトグル */
+.toggle{
+  padding:.55rem .7rem;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:var(--card);
+  color:var(--fg);
+  cursor:pointer;
+}
+.toggle:hover{ background:#171c25; border-color:#303a49 }
+.toggle.active{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.toggle:disabled{ opacity:.55; cursor:not-allowed }
 .ctl{ display:flex; flex-direction:column; gap:.35rem; }
 .ctl > span{ font-size:.85rem; color:var(--muted); }
 .ctl select, .ctl input[type=number]{
