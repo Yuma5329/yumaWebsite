@@ -11,18 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const ageMinEl   = $("#ageMin");
   const ageMaxEl   = $("#ageMax");
   const sortSel    = $("#sortBy");
+  const favOnlyBtn = $("#favOnlyBtn");   // ← ツールバーに“お気に入りのみ”ボタンがあれば取得
 
   /* ---------- 状態 ---------- */
   let LIST = [];
   const PROFILE_CACHE = new Map();
 
-  // ← 追加：お気に入り（ログインユーザーの slug セット）
-  let FAVORITES = new Set();
+  // お気に入り（Supabaseの favorites テーブル由来）
+  let FAVORITES = new Set();   // slug の集合
+  let FAV_ONLY  = false;       // “お気に入りのみ表示”フラグ
 
   /* ---------- ユーティリティ ---------- */
-  const slugify = s => (s||"").toLowerCase().replace(/[^a-z0-9\-]/g,'');
-  const byNameAsc  = (a,b)=> a.name.localeCompare(b.name, 'ja', {sensitivity:'base'});
-  const byNameDesc = (a,b)=> b.name.localeCompare(a.name, 'ja', {sensitivity:'base'});
+  const slugify     = s => (s||"").toLowerCase().replace(/[^a-z0-9\-]/g,'');
+  const byNameAsc   = (a,b)=> a.name.localeCompare(b.name, 'ja', {sensitivity:'base'});
+  const byNameDesc  = (a,b)=> b.name.localeCompare(a.name, 'ja', {sensitivity:'base'});
 
   function thumbHTML(id, alt){
     const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
@@ -56,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return Number.isFinite(age) ? age : undefined;
   }
 
-  /* ---------- Supabase連携（お気に入り） ---------- */
+  /* ---------- Supabase 連携（お気に入り） ---------- */
   async function getCurrentUser(){
     if (!window.sb) return null;
     const { data: { user } } = await sb.auth.getUser();
@@ -65,22 +67,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadFavorites(){
     const user = await getCurrentUser();
-    if (!user) { FAVORITES = new Set(); return; }
+    if (!user || !window.sb) {
+      FAVORITES = new Set();
+      updateFavOnlyUI();
+      return;
+    }
     const { data, error } = await sb
       .from('favorites')
       .select('slug')
       .order('created_at', { ascending: false });
-    if (!error && Array.isArray(data)) {
-      FAVORITES = new Set(data.map(r => r.slug));
-    } else {
-      FAVORITES = new Set();
-    }
+    FAVORITES = (!error && Array.isArray(data)) ? new Set(data.map(r => r.slug)) : new Set();
+    updateFavOnlyUI();
   }
 
   async function toggleFavorite(slug){
     const user = await getCurrentUser();
-    if (!user) { alert('お気に入りはログイン後に利用できます'); return; }
-
+    if (!user || !window.sb) {
+      alert('お気に入りはログイン後に利用できます');
+      return;
+    }
     if (FAVORITES.has(slug)) {
       const { error } = await sb.from('favorites')
         .delete()
@@ -92,7 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
         .insert({ user_id: user.id, slug });
       if (!error) FAVORITES.add(slug);
     }
-    renderList(); // 見た目更新
+    updateFavOnlyUI();
+    renderList();
+  }
+
+  function updateFavOnlyUI(){
+    if (!favOnlyBtn) return; // ボタンが無いページでもエラーにしない
+    favOnlyBtn.classList.toggle('active', FAV_ONLY);
+    favOnlyBtn.textContent = (FAV_ONLY ? '★ ' : '☆ ') + 'お気に入りのみ';
+    // お気に入り0件のときはOFF状態で無効化（ON時はOFFに戻せるよう有効のまま）
+    favOnlyBtn.disabled = (!FAVORITES.size && !FAV_ONLY);
   }
 
   /* ---------- マニフェスト ---------- */
@@ -164,15 +178,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderList(){
     const {country, min, max, sort} = currentFilters();
     let out = LIST.filter(p=>{
-      if(country!=="All" && p.country!==country) return false;
-      if(Number.isFinite(min) && !(Number.isFinite(p._age) && p._age>=min)) return false;
-      if(Number.isFinite(max) && !(Number.isFinite(p._age) && p._age<=max)) return false;
+      if (FAV_ONLY && !FAVORITES.has(p.slug)) return false; // ← お気に入りのみ
+      if (country!=="All" && p.country!==country) return false;
+      if (Number.isFinite(min) && !(Number.isFinite(p._age) && p._age>=min)) return false;
+      if (Number.isFinite(max) && !(Number.isFinite(p._age) && p._age<=max)) return false;
       return true;
     });
     applySort(out, sort);
     listEl.innerHTML = out.map(cardHTML).join("");
   }
 
+  /* ---------- 詳細 ---------- */
   function detailHTML(p){
     const age = calcAge(p.birthdate);
     const ageLine = Number.isFinite(age) ? `<div><span>年齢</span><strong>${age}</strong></div>` : "";
@@ -244,37 +260,43 @@ document.addEventListener('DOMContentLoaded', () => {
   window.playVideo = (id, el)=>{
     el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
   };
-  $("#backToList").addEventListener("click", ()=>{ history.pushState(null,"",location.pathname+location.search); routeFromHash(); });
-
-  [countrySel, ageMinEl, ageMaxEl, sortSel].forEach(el=>{
-    el.addEventListener('input', renderList);
-    el.addEventListener('change', renderList);
+  $("#backToList").addEventListener("click", ()=>{
+    history.pushState(null,"",location.pathname+location.search);
+    routeFromHash();
   });
 
-  // ← 追加：カード上の★クリック（イベント委譲）
+  // カードの★クリック（イベント委譲）
   listEl.addEventListener('click', (e)=>{
     const btn = e.target.closest('.fav-btn');
-    if (btn) {
-      const slug = btn.dataset.slug;
-      toggleFavorite(slug);
-    }
+    if (btn) toggleFavorite(btn.dataset.slug);
   });
+
+  // “お気に入りのみ表示”トグル
+  if (favOnlyBtn) {
+    favOnlyBtn.addEventListener('click', async ()=>{
+      if (!FAVORITES.size) {
+        const user = await getCurrentUser();
+        if (!user) { alert('ログインするとお気に入りが使えます'); return; }
+      }
+      FAV_ONLY = !FAV_ONLY;
+      updateFavOnlyUI();
+      renderList();
+    });
+  }
 
   /* ---------- 初期化 ---------- */
   (async ()=>{
     await loadManifest();
-    await loadFavorites();      // ← 追加：ログインしていればお気に入りを取得
+    await loadFavorites();      // ログイン済みならお気に入り取得
     renderList();
     routeFromHash();
 
-    // ← 追加：ログイン状態が変わったら取り直して反映
-    if (window.sb) {
-      sb.auth.onAuthStateChange(async () => {
+    if (window.sb && sb.auth?.onAuthStateChange) {
+      sb.auth.onAuthStateChange(async ()=>{
         await loadFavorites();
         renderList();
       });
     }
   })();
-
 
 });
