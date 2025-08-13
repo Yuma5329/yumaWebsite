@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let LIST = [];
   const PROFILE_CACHE = new Map();
 
+  // ← 追加：お気に入り（ログインユーザーの slug セット）
+  let FAVORITES = new Set();
+
   /* ---------- ユーティリティ ---------- */
   const slugify = s => (s||"").toLowerCase().replace(/[^a-z0-9\-]/g,'');
   const byNameAsc  = (a,b)=> a.name.localeCompare(b.name, 'ja', {sensitivity:'base'});
@@ -53,6 +56,45 @@ document.addEventListener('DOMContentLoaded', () => {
     return Number.isFinite(age) ? age : undefined;
   }
 
+  /* ---------- Supabase連携（お気に入り） ---------- */
+  async function getCurrentUser(){
+    if (!window.sb) return null;
+    const { data: { user } } = await sb.auth.getUser();
+    return user || null;
+  }
+
+  async function loadFavorites(){
+    const user = await getCurrentUser();
+    if (!user) { FAVORITES = new Set(); return; }
+    const { data, error } = await sb
+      .from('favorites')
+      .select('slug')
+      .order('created_at', { ascending: false });
+    if (!error && Array.isArray(data)) {
+      FAVORITES = new Set(data.map(r => r.slug));
+    } else {
+      FAVORITES = new Set();
+    }
+  }
+
+  async function toggleFavorite(slug){
+    const user = await getCurrentUser();
+    if (!user) { alert('お気に入りはログイン後に利用できます'); return; }
+
+    if (FAVORITES.has(slug)) {
+      const { error } = await sb.from('favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('slug', slug);
+      if (!error) FAVORITES.delete(slug);
+    } else {
+      const { error } = await sb.from('favorites')
+        .insert({ user_id: user.id, slug });
+      if (!error) FAVORITES.add(slug);
+    }
+    renderList(); // 見た目更新
+  }
+
   /* ---------- マニフェスト ---------- */
   async function loadManifest(){
     const res = await fetch('profiles/index.json', {cache:'no-store'});
@@ -87,8 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------- 一覧描画 ---------- */
   function cardHTML(p){
     const ageText = Number.isFinite(p._age) ? p._age : "-";
+    const favOn   = FAVORITES.has(p.slug);
+    const favLbl  = favOn ? "★" : "☆";
+    const favCls  = favOn ? "fav-btn on" : "fav-btn";
+
     return `
       <article class="card">
+        <button class="${favCls}" data-slug="${p.slug}" aria-label="お気に入り">${favLbl}</button>
         <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
         <div class="pad">
           <div class="name">
@@ -204,11 +251,29 @@ document.addEventListener('DOMContentLoaded', () => {
     el.addEventListener('change', renderList);
   });
 
+  // ← 追加：カード上の★クリック（イベント委譲）
+  listEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.fav-btn');
+    if (btn) {
+      const slug = btn.dataset.slug;
+      toggleFavorite(slug);
+    }
+  });
+
   /* ---------- 初期化 ---------- */
   (async ()=>{
     await loadManifest();
+    await loadFavorites();      // ← 追加：ログインしていればお気に入りを取得
     renderList();
     routeFromHash();
+
+    // ← 追加：ログイン状態が変わったら取り直して反映
+    if (window.sb) {
+      sb.auth.onAuthStateChange(async () => {
+        await loadFavorites();
+        renderList();
+      });
+    }
   })();
 
 });
