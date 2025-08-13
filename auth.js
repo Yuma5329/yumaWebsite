@@ -1,7 +1,7 @@
 // === auth.js ===
 // 1) 環境値（SupabaseのAPI › Project URL / anon public）
-const SUPABASE_URL = "https://xxxxxxxxxxxx.supabase.co";   // ←あなたのURLに置換
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIs...";       // ←あなたのanon keyに置換
+const SUPABASE_URL = "https://fzagbgiulecokykvidvv.supabase.co";   // ←あなたのURLに置換
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6YWdiZ2l1bGVjb2t5a3ZpZHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwNjQ2MzEsImV4cCI6MjA3MDY0MDYzMX0.v62G6RSGUg1lZ0SXIY2lzvAYhyIy2tS--1AGgtP1T4I";       // ←あなたのanon keyに置換
 
 // 2) クライアント作成（UMDは window.supabase から）
 window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
