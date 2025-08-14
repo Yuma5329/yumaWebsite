@@ -56,7 +56,8 @@ function openAuthModal(){
 function closeAuthModal(){ hide($("#authBackdrop")); }
 
 // 4.5) リダイレクトハッシュ処理
-let justLoggedIn = false; // 成功トーストの二重表示防止兼ねる
+let justLoggedIn = false;     // ログイン直後のトースト制御
+let hadUser = null;           // 直前の「ログインしていたか」状態
 async function handleAuthRedirect() {
   const hash = window.location.hash.slice(1);
   if (!hash) return;
@@ -80,8 +81,11 @@ async function handleAuthRedirect() {
 // 5) 起動時
 (async () => {
   await handleAuthRedirect();
-  const { data: { session } } = await sb.auth.getSession();
+  const { data: { session} } = await sb.auth.getSession();
   updateAuthUI(session?.user || null);
+
+  // 初期の「直前状態」を記録（初回 onAuthStateChange で誤検知しないため）
+  hadUser = !!session?.user;
 
   // リダイレクト経由でログイン完了していたらトースト
   if (session?.user && justLoggedIn) {
@@ -94,12 +98,26 @@ async function handleAuthRedirect() {
 sb.auth.onAuthStateChange((_event, session) => {
   updateAuthUI(session?.user || null);
 
-  if (session?.user && justLoggedIn) {
+  const nowHasUser = !!session?.user;
+
+  // ログイン直後（フォーム or リダイレクト）
+  if (!hadUser && nowHasUser) {
     closeAuthModal();
-    showToast("ログインしました");
-    justLoggedIn = false;
+    // フォームログイン時は justLoggedIn フラグを立ててるので二重にならない
+    if (justLoggedIn) {
+      showToast("ログインしました");
+      justLoggedIn = false;
+    }
   }
 
+  // ログアウト直後（ここでトーストを必ず出す）
+  if (hadUser && !nowHasUser) {
+    showToast("ログアウトしました");
+  }
+
+  hadUser = nowHasUser;
+
+  // 他のスクリプトに知らせたい場合のカスタムイベント
   const ev = new CustomEvent("auth:state", { detail:{ user: session?.user || null } });
   window.dispatchEvent(ev);
 });
@@ -127,10 +145,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") closeAuthModal();
   });
 
+  // ログアウト（※トーストは onAuthStateChange で出すのでここでは出さない）
   logoutBtn?.addEventListener("click", async () => {
     try {
       await sb.auth.signOut();
-      showToast("ログアウトしました");
     } catch (e) {
       alert("ログアウトに失敗しました: " + (e.message || e));
     }
@@ -148,17 +166,15 @@ document.addEventListener("DOMContentLoaded", () => {
       text(msg, "メールとパスワードを入力してください。");
       return;
     }
-    justLoggedIn = true; // この後 onAuthStateChange でトースト表示するためフラグ立て
+    // この後 onAuthStateChange で「ログインしました」を出すためフラグ立て
+    justLoggedIn = true;
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
       justLoggedIn = false; // 失敗なので解除
       text(msg, error.message || "メールアドレスまたはパスワードが間違っています。");
       return;
     }
-    // ここで即閉じてもOKだが、確実性のため onAuthStateChange でも閉じる
-    closeAuthModal();
-    showToast("ログインしました");
-    justLoggedIn = false; // ここで表示したので解除
+    // 成功時は onAuthStateChange が走ってモーダルを閉じ、トーストも出ます
   });
 
   // 新規登録（メール＋パスワード）
