@@ -7,12 +7,11 @@ const SUPABASE_ANON_KEY =
 window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const sb = window.sb;
 
-// GitHub Pages の公開URL
+// GitHub Pages の公開URL（ハッシュ消去用）
 const APP_URL = "https://yuma5329.github.io/yumaWebsite/";
 
 // 2) 小ユーティリティ
 const $  = (q) => document.querySelector(q);
-const $$ = (q) => document.querySelectorAll(q);
 function show(el){ if (!el) return; el.hidden = false; el.style.display = ""; }
 function hide(el){ if (!el) return; el.hidden = true; }
 function text(el, t=""){ if (el) el.textContent = t; }
@@ -56,8 +55,8 @@ function openAuthModal(){
 function closeAuthModal(){ hide($("#authBackdrop")); }
 
 // 4.5) リダイレクトハッシュ処理
-let justLoggedIn = false;     // ログイン直後のトースト制御
-let hadUser = null;           // 直前の「ログインしていたか」状態
+let justLoggedIn = false; // ログイン直後のトースト制御
+let hadUser = null;       // 直前の「ログインしていたか」状態
 async function handleAuthRedirect() {
   const hash = window.location.hash.slice(1);
   if (!hash) return;
@@ -84,10 +83,10 @@ async function handleAuthRedirect() {
   const { data: { session} } = await sb.auth.getSession();
   updateAuthUI(session?.user || null);
 
-  // 初期の「直前状態」を記録（初回 onAuthStateChange で誤検知しないため）
+  // 初期の状態を記録
   hadUser = !!session?.user;
 
-  // リダイレクト経由でログイン完了していたらトースト
+  // リダイレクト経由ログイン完了時のトースト
   if (session?.user && justLoggedIn) {
     showToast("ログインしました");
     justLoggedIn = false;
@@ -100,24 +99,23 @@ sb.auth.onAuthStateChange((_event, session) => {
 
   const nowHasUser = !!session?.user;
 
-  // ログイン直後（フォーム or リダイレクト）
+  // ログイン直後（フォーム／リダイレクト両方に対応）
   if (!hadUser && nowHasUser) {
     closeAuthModal();
-    // フォームログイン時は justLoggedIn フラグを立ててるので二重にならない
     if (justLoggedIn) {
       showToast("ログインしました");
       justLoggedIn = false;
     }
   }
 
-  // ログアウト直後（ここでトーストを必ず出す）
+  // ログアウト直後は必ずトースト
   if (hadUser && !nowHasUser) {
     showToast("ログアウトしました");
   }
 
   hadUser = nowHasUser;
 
-  // 他のスクリプトに知らせたい場合のカスタムイベント
+  // 他のスクリプトへ通知（必要に応じて）
   const ev = new CustomEvent("auth:state", { detail:{ user: session?.user || null } });
   window.dispatchEvent(ev);
 });
@@ -145,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") closeAuthModal();
   });
 
-  // ログアウト（※トーストは onAuthStateChange で出すのでここでは出さない）
+  // ログアウト（トーストは onAuthStateChange で出す）
   logoutBtn?.addEventListener("click", async () => {
     try {
       await sb.auth.signOut();
@@ -154,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // フォーム送信はデフォルト送信を止める
   authForm?.addEventListener("submit", (e) => e.preventDefault());
 
   // ログイン（メール＋パスワード）
@@ -166,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
       text(msg, "メールとパスワードを入力してください。");
       return;
     }
-    // この後 onAuthStateChange で「ログインしました」を出すためフラグ立て
+    // onAuthStateChange で「ログインしました」を出すためフラグ
     justLoggedIn = true;
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
@@ -174,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
       text(msg, error.message || "メールアドレスまたはパスワードが間違っています。");
       return;
     }
-    // 成功時は onAuthStateChange が走ってモーダルを閉じ、トーストも出ます
+    // 成功時は onAuthStateChange が走る（モーダル閉じ＆トースト表示）
   });
 
   // 新規登録（メール＋パスワード）
