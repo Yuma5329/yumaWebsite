@@ -9,6 +9,7 @@
   --radius:.75rem; --gap: clamp(.6rem, 1.2vw, .9rem);
   --shadow: 0 6px 16px rgba(0,0,0,.25);
 }
+
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -17,6 +18,7 @@ body{
   background:var(--bg); color:var(--fg);
   overflow:hidden;
 }
+[hidden]{ display:none !important; }
 
 /* Scrollbar */
 *{scrollbar-color:#3a4352 transparent; scrollbar-width:thin}
@@ -88,9 +90,7 @@ aside#sidebar{
   word-break: break-word;
   transition: background .15s;
 }
-.menu-item:hover{
-  background: #1e232c;
-}
+.menu-item:hover{ background: #1e232c; }
 .menu-item.active{
   background: #e5e7eb; /* ChatGPT風 背景色 */
   color: #000;
@@ -114,8 +114,6 @@ main{
   margin:0 0 calc(var(--gap)*1.6);
   background: color-mix(in oklab, var(--bg) 98%, transparent);
 }
-
-/* お気に入りトグル */
 .toggle{
   padding:.55rem .7rem;
   border:1px solid var(--border);
@@ -130,7 +128,6 @@ main{
   box-shadow: 0 0 0 1px var(--accent) inset;
 }
 .toggle:disabled{ opacity:.55; cursor:not-allowed }
-
 .ctl{ display:flex; flex-direction:column; gap:.35rem; }
 .ctl > span{ font-size:.85rem; color:var(--muted); }
 .ctl select, .ctl input[type=number]{
@@ -148,6 +145,7 @@ main{
 
 /* Card */
 .card{
+  position:relative;
   background:var(--card); border:1px solid var(--border);
   border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
   transition:transform .06s, box-shadow .12s, border-color .12s
@@ -191,8 +189,7 @@ main{
 .detail-sns .sns.tk,
 .detail-sns .sns.web{ color:#e6e9ef; }
 
-/* Favorite star on cards */
-.card{ position:relative; }
+/* Favorite button */
 .fav-btn{
   position:absolute; top:.5rem; right:.5rem;
   width:2.1rem; height:2.1rem;
@@ -202,7 +199,7 @@ main{
 }
 .fav-btn.on{ background:#1e2230; border-color:#3a4253; }
 
-/* ===== Modal (Auth) ===== */
+/* ===== Modal (login) ===== */
 .modal-backdrop{
   position:fixed; inset:0; background:rgba(0,0,0,.5);
   display:flex; align-items:center; justify-content:center;
@@ -222,27 +219,11 @@ main{
 .modal .actions{ display:flex; gap:.5rem; justify-content:flex-end; margin-top:.8rem; }
 .link-like{ background:transparent; border:0; color:var(--muted); cursor:pointer; }
 
-/* [hidden] の上書き（HTML全体で効く） */
-[hidden]{ display:none !important; }
-
-/* ===== Toast（ログイン成功時の小さな通知） ===== */
+/* ===== Toast ===== */
 .toast{
-  position: fixed;
-  top: calc(var(--headerH) + .5rem);
-  left: 50%;
-  transform: translateX(-50%) translateY(-10px);
-  background: #1e232c;
-  color: var(--fg);
-  border: 1px solid var(--border);
-  border-radius: .5rem;
-  padding: .6rem .9rem;
-  box-shadow: var(--shadow);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .2s, transform .2s;
-  z-index: 1000;
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(16px);
+  background:#222833; color:#e6e9ef; border:1px solid #2b3341; border-radius:.6rem;
+  padding:.6rem .8rem; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
+  z-index:1000;
 }
-.toast.show{
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
