@@ -4,31 +4,6 @@
 <meta charset="utf-8">
 <title>Beatboxer図鑑</title>
 <link rel="stylesheet" href="style.css">
-<style>
-  /* 最小限のモーダル用スタイル（既存CSSに影響しないよう軽く） */
-  .modal-backdrop{
-    position:fixed; inset:0; background:rgba(0,0,0,.5);
-    display:flex; align-items:center; justify-content:center;
-    z-index:999;
-  }
-  .modal{ background:var(--card, #151a22); color:var(--fg, #e6e9ef);
-    border:1px solid var(--border, #232a35); border-radius:.75rem;
-    width:min(480px, 92vw); padding:1rem; box-shadow:0 10px 24px rgba(0,0,0,.35);
-  }
-  .modal h3{ margin:.2rem 0 1rem; }
-  .modal .row{ display:flex; flex-direction:column; gap:.35rem; margin:.6rem 0; }
-  .modal input{ padding:.6rem .7rem; border:1px solid var(--border, #232a35);
-    border-radius:.6rem; background:var(--bg, #0e1116); color:inherit; }
-  .modal .actions{ display:flex; gap:.5rem; justify-content:flex-end; margin-top:.8rem; }
-  .link-like{ background:transparent; border:0; color:var(--muted,#9aa6b2); cursor:pointer; }
-  [hidden]{ display:none !important; }
-  .fav.toggle{ align-self:end; }
-  .fav-btn{ position:absolute; top:.5rem; right:.5rem; z-index:1;
-    border:1px solid var(--border); background:var(--card); border-radius:.5rem;
-    padding:.2rem .45rem; cursor:pointer;
-  }
-  .fav-btn.on{ color:#ffd54a; }
-</style>
 </head>
 <body>
   <div class="layout">
@@ -130,19 +105,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- 認証だけを担当するスクリプト（sb を作成し、フォームイベントをバインド） -->
   <script src="auth.js"></script>
-
-  <script>
-    // モーダルの開閉（超ミニJS：auth.jsに書いてもOK）
-    const loginBtn    = document.getElementById('loginBtn');
-    const logoutBtn   = document.getElementById('logoutBtn');
-    const backdrop    = document.getElementById('authBackdrop');
-    const closeBtn    = document.getElementById('authClose');
-
-    loginBtn?.addEventListener('click', () => { backdrop.hidden = false; });
-    closeBtn?.addEventListener('click', () => { backdrop.hidden = true; });
-
-    // ログイン成功時に auth.js から呼べるように
-    window.__closeAuthModal = () => { backdrop.hidden = true; };
-  </script>
+  
 </body>
 </html>
