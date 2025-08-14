@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileEl  = $("#profile");
 
   // toolbar
+  const qEl        = $("#q");      // ← 追加：検索入力
   const countrySel = $("#filterCountry");
   const ageMinEl   = $("#ageMin");
   const ageMaxEl   = $("#ageMax");
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- ユーティリティ ---------- */
   const slugify     = s => (s||"").toLowerCase().replace(/[^a-z0-9\-]/g,'');
+  const norm = (s) => (s ?? "").toString().toLowerCase();  // ← 追加：小文字化ヘルパ
   const byNameAsc   = (a,b)=> a.name.localeCompare(b.name, 'ja', {sensitivity:'base'});
   const byNameDesc  = (a,b)=> b.name.localeCompare(a.name, 'ja', {sensitivity:'base'});
 
@@ -167,7 +169,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const min = parseInt(ageMinEl.value,10);
     const max = parseInt(ageMaxEl.value,10);
     const sort = sortSel.value || "name-asc";
-    return {country, min: Number.isFinite(min)?min:undefined, max: Number.isFinite(max)?max:undefined, sort};
+    const q = norm(qEl?.value || "");          // ← 追加
+    return {
+      country,
+      min: Number.isFinite(min)?min:undefined,
+      max: Number.isFinite(max)?max:undefined,
+      sort,
+      q                                      // ← 追加
+    };
   }
 
   function applySort(arr, key){
@@ -176,14 +185,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderList(){
-    const {country, min, max, sort} = currentFilters();
+    const {country, min, max, sort, q} = currentFilters();  // ← q を受け取る
+  
     let out = LIST.filter(p=>{
-      if (FAV_ONLY && !FAVORITES.has(p.slug)) return false; // ← お気に入りのみ
+      if (q && !norm(p.name).includes(q)) return false;     // ← 追加：名前部分一致
       if (country!=="All" && p.country!==country) return false;
       if (Number.isFinite(min) && !(Number.isFinite(p._age) && p._age>=min)) return false;
       if (Number.isFinite(max) && !(Number.isFinite(p._age) && p._age<=max)) return false;
       return true;
     });
+  
     applySort(out, sort);
     listEl.innerHTML = out.map(cardHTML).join("");
   }
@@ -257,6 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('hashchange', routeFromHash);
 
   /* ---------- イベント ---------- */
+  [qEl, countrySel, ageMinEl, ageMaxEl, sortSel].forEach(el=>{
+    el?.addEventListener('input', renderList);
+    el?.addEventListener('change', renderList);
+  });
+
   window.playVideo = (id, el)=>{
     el.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
   };
