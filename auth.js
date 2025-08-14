@@ -166,4 +166,16 @@ document.addEventListener("DOMContentLoaded", () => {
     text(msg, "登録メールを送信しました。メール内のリンクを開いてください。");
   });
 
+  // モーダルの開閉（超ミニJS：auth.jsに書いてもOK）
+  const loginBtn    = document.getElementById('loginBtn');
+  const logoutBtn   = document.getElementById('logoutBtn');
+  const backdrop    = document.getElementById('authBackdrop');
+  const closeBtn    = document.getElementById('authClose');
+
+  loginBtn?.addEventListener('click', () => { backdrop.hidden = false; });
+  closeBtn?.addEventListener('click', () => { backdrop.hidden = true; });
+
+  // ログイン成功時に auth.js から呼べるように
+  window.__closeAuthModal = () => { backdrop.hidden = true; };
+
 });
