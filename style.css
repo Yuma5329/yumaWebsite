@@ -72,11 +72,11 @@ aside#sidebar{
   display: flex;
   flex-direction: column;
   gap: .5rem;
-  padding-right: .4rem; /* ← 右端の見切れ防止 */
+  padding-right: .4rem; /* 右端の見切れ防止 */
 }
 .menu-item{
   all: unset;
-  box-sizing: border-box;   /* ←これを追加！ */
+  box-sizing: border-box;
   display: block;
   width: 100%;
   padding: .6rem .8rem;
@@ -106,10 +106,8 @@ main{
 }
 
 /* ===== Toolbar ===== */
-/* 既存 .toolbar をこれに置換（可変カラム） */
 .toolbar{
   display:grid;
-  /* ← ここを可変に：項目が増えても自動で折り返し */
   grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap:var(--gap);
   padding:.8rem .2rem;
@@ -117,7 +115,7 @@ main{
   background: color-mix(in oklab, var(--bg) 98%, transparent);
 }
 
-/* 追加：お気に入りトグル */
+/* お気に入りトグル */
 .toggle{
   padding:.55rem .7rem;
   border:1px solid var(--border);
@@ -132,6 +130,7 @@ main{
   box-shadow: 0 0 0 1px var(--accent) inset;
 }
 .toggle:disabled{ opacity:.55; cursor:not-allowed }
+
 .ctl{ display:flex; flex-direction:column; gap:.35rem; }
 .ctl > span{ font-size:.85rem; color:var(--muted); }
 .ctl select, .ctl input[type=number]{
@@ -192,6 +191,7 @@ main{
 .detail-sns .sns.tk,
 .detail-sns .sns.web{ color:#e6e9ef; }
 
+/* Favorite star on cards */
 .card{ position:relative; }
 .fav-btn{
   position:absolute; top:.5rem; right:.5rem;
@@ -201,3 +201,26 @@ main{
   display:flex; align-items:center; justify-content:center;
 }
 .fav-btn.on{ background:#1e2230; border-color:#3a4253; }
+
+/* ===== Modal (Auth) ===== */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.5);
+  display:flex; align-items:center; justify-content:center;
+  z-index:999;
+}
+.modal{
+  background:var(--card); color:var(--fg);
+  border:1px solid var(--border); border-radius:.75rem;
+  width:min(480px, 92vw); padding:1rem; box-shadow:0 10px 24px rgba(0,0,0,.35);
+}
+.modal h3{ margin:.2rem 0 1rem; }
+.modal .row{ display:flex; flex-direction:column; gap:.35rem; margin:.6rem 0; }
+.modal input{
+  padding:.6rem .7rem; border:1px solid var(--border);
+  border-radius:.6rem; background:var(--bg); color:inherit;
+}
+.modal .actions{ display:flex; gap:.5rem; justify-content:flex-end; margin-top:.8rem; }
+.link-like{ background:transparent; border:0; color:var(--muted); cursor:pointer; }
+
+/* [hidden] の上書き（HTML全体で効く） */
+[hidden]{ display:none !important; }
