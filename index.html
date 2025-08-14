@@ -131,7 +131,19 @@
   <!-- Supabase UMD（ブラウザ用） -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- 認証だけを担当するスクリプト（sb を作成し、フォームイベントをバインド） -->
-  <script src="auth.js"></script>
+  <script>
+    // モーダルの開閉（超ミニJS：auth.jsに書いてもOK）
+    const loginBtn    = document.getElementById('loginBtn');
+    const logoutBtn   = document.getElementById('logoutBtn');
+    const backdrop    = document.getElementById('authBackdrop');
+    const closeBtn    = document.getElementById('authClose');
+  
+    loginBtn?.addEventListener('click', () => { backdrop.hidden = false; });
+    closeBtn?.addEventListener('click', () => { backdrop.hidden = true; });
+  
+    // ログイン成功時に auth.js から呼べるように
+    window.__closeAuthModal = () => { backdrop.hidden = true; };
+  </script>
   
 </body>
 </html>
