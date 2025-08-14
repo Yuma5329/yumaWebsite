@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Beatboxer図鑑</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -28,6 +29,7 @@
 
     <!-- Main -->
     <main>
+
       <!-- 一覧 -->
       <section id="listView">
         <!-- ツールバー -->
@@ -97,12 +99,11 @@
     </div>
   </div>
 
-  <!-- Scripts（順番が重要！） -->
-  <!-- 1) Supabase（UMD） -->
+  <!-- Supabase UMD（先に読み込む） -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- 2) 認証（sb を作り、モーダルも含めてバインド） -->
+  <!-- 認証まわり -->
   <script src="auth.js"></script>
-  <!-- 3) アプリ本体（一覧・詳細など） -->
+  <!-- アプリ本体 -->
   <script src="script.js"></script>
 </body>
 </html>
