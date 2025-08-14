@@ -224,3 +224,25 @@ main{
 
 /* [hidden] の上書き（HTML全体で効く） */
 [hidden]{ display:none !important; }
+
+/* ===== Toast（ログイン成功時の小さな通知） ===== */
+.toast{
+  position: fixed;
+  top: calc(var(--headerH) + .5rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: #1e232c;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  padding: .6rem .9rem;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+  z-index: 1000;
+}
+.toast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
