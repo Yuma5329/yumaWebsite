@@ -130,7 +130,7 @@ main{
 .toggle:disabled{ opacity:.55; cursor:not-allowed }
 .ctl{ display:flex; flex-direction:column; gap:.35rem; }
 .ctl > span{ font-size:.85rem; color:var(--muted); }
-.ctl select, .ctl input[type=number]{
+.ctl select, .ctl input{
   width:100%; padding:.55rem .7rem; border:1px solid var(--border);
   border-radius:var(--radius); background:var(--card); color:var(--fg);
 }
