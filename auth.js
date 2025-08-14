@@ -7,10 +7,10 @@ const SUPABASE_ANON_KEY =
 window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const sb = window.sb;
 
-// （任意）公開サイトURL：ハッシュ消去に使う（GitHub Pages の公開URLに合わせておく）
+// 公開サイトURL（GitHub Pagesの公開URLに合わせる）
 const APP_URL = "https://yuma5329.github.io/yumaWebsite/";
 
-// 2) 便利関数
+// 2) 小ユーティリティ
 const $  = (q) => document.querySelector(q);
 const $$ = (q) => document.querySelectorAll(q);
 function show(el){ if (!el) return; el.hidden = false; el.style.display = ""; }
@@ -31,21 +31,20 @@ function updateAuthUI(user){
   }
 }
 
-// 4) モーダルの開閉（#authBackdrop をターゲット）
+// 4) モーダルの開閉（#authBackdrop）
 function openAuthModal(){
   const msg = $("#authMsg");
-  msg?.replaceChildren();              // メッセージ消去
+  msg?.replaceChildren();   // メッセージ消去
   $("#authForm")?.reset();
   show($("#authBackdrop"));
 }
 function closeAuthModal(){
   hide($("#authBackdrop"));
 }
-window.__closeAuthModal = closeAuthModal; // 他ファイルから閉じたい時用（任意）
 
 // 4.5) Supabaseリダイレクトのハッシュを処理してURLをクリーンに
 async function handleAuthRedirect() {
-  const hash = window.location.hash.slice(1); // 先頭#を除去
+  const hash = window.location.hash.slice(1);
   if (!hash) return;
 
   const qs = new URLSearchParams(hash);
@@ -54,18 +53,16 @@ async function handleAuthRedirect() {
 
   if (!hasAuthHash) return;
 
-  // ハッシュ内のトークンをクライアントに取り込ませる
+  // ハッシュ内トークンを取り込み
   await sb.auth.getSession();
 
-  // アドレスバーからトークンを消す（ルーティング破壊も防止）
-  // ※ GitHub Pages で公開パスが違うなら APP_URL を合わせてください
+  // アドレスバーからトークンを消す（ルーティング破壊を防止）
   window.history.replaceState(null, "", APP_URL);
 }
 
 // 5) 起動時にセッション反映
 (async () => {
-  await handleAuthRedirect(); // まずリダイレクト由来のハッシュを処理
-
+  await handleAuthRedirect();
   const { data: { session } } = await sb.auth.getSession();
   updateAuthUI(session?.user || null);
 })();
@@ -73,14 +70,14 @@ async function handleAuthRedirect() {
 // 6) 状態変化を監視（ログイン/ログアウト）
 sb.auth.onAuthStateChange((_event, session) => {
   updateAuthUI(session?.user || null);
-  // ログイン成功後はモーダルを確実に閉じる
+
+  // ログイン成功時はモーダルを確実に閉じて通知（任意）
   if (session?.user) {
     closeAuthModal();
-    // ついでにメッセージも出せる（任意）
-    // alert("ログインしました");
+    // window.alert("ログインしました"); // 必要なら
   }
 
-  // 他のスクリプトに知らせたい場合のカスタムイベント
+  // 他のスクリプトに知らせたい場合（お気に入り再取得など）
   const ev = new CustomEvent("auth:state", { detail:{ user: session?.user || null } });
   window.dispatchEvent(ev);
 });
@@ -104,21 +101,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // モーダル×ボタン
   closeBtn?.addEventListener("click", closeAuthModal);
   backdrop?.addEventListener("click", (e)=>{
-    // 背景クリックで閉じる（中のカードクリックは除外）
-    if (e.target.id === "authBackdrop") closeAuthModal();
+    if (e.target.id === "authBackdrop") closeAuthModal(); // 背景クリックで閉じる
+  });
+  // Esc キーでも閉じる
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape") closeAuthModal();
   });
 
   // ログアウト
   logoutBtn?.addEventListener("click", async () => {
     try {
       await sb.auth.signOut();
-      // onAuthStateChange でUIは更新される
+      // onAuthStateChange でUI更新
     } catch (e) {
       alert("ログアウトに失敗しました: " + (e.message || e));
     }
   });
 
-  // フォーム送信はブラウザのデフォルト送信を抑止（ボタンで分岐するため）
+  // フォームのデフォ送信は抑止（ボタンで分岐）
   authForm?.addEventListener("submit", (e) => e.preventDefault());
 
   // ログイン（メール＋パスワード）
@@ -150,12 +150,10 @@ document.addEventListener("DOMContentLoaded", () => {
       text(msg, "メールとパスワードを入力してください。");
       return;
     }
-    // Supabase 側の Email 設定が「確認メール送る」なら、ここで確認メールが届く
     const { error } = await sb.auth.signUp({
       email,
       password,
       options: {
-        // 明示しておくと安心（確認リンクの戻り先）
         emailRedirectTo: APP_URL
       }
     });
@@ -165,5 +163,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     text(msg, "登録メールを送信しました。メール内のリンクを開いてください。");
   });
-
 });
