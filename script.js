@@ -331,4 +331,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 
+
+    // 例: 詳細ページ表示時
+  async function loadVideosFor(p){
+    try{
+      const body = { name: p.name, slug: p.slug, yt: p.socials?.youtube || null };
+      const { data, error } = await sb.functions.invoke('yt-search', { body });
+      if (error) throw error;
+  
+      renderVideoBucket('vb-personal', data.personal);
+      renderVideoBucket('vb-swiss',   data.swissbeatbox);
+      renderVideoBucket('vb-others',  data.others);
+    }catch(e){
+      console.error(e);
+      renderVideoBucket('vb-personal', []);
+      renderVideoBucket('vb-swiss',   []);
+      renderVideoBucket('vb-others',  []);
+    }
+  }
+
+
 });
