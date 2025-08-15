@@ -70,31 +70,16 @@ aside#sidebar{
   border-right:1px solid var(--border-soft);
   overflow:hidden;
 }
-.menu {
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-  padding-right: .4rem; /* 右端の見切れ防止 */
-}
+.menu { display:flex; flex-direction:column; gap:.5rem; padding-right:.4rem; }
 .menu-item{
-  all: unset;
-  box-sizing: border-box;
-  display: block;
-  width: 100%;
-  padding: .6rem .8rem;
-  border-radius: var(--radius);
-  cursor: pointer;
-  background: var(--card);
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  transition: background .15s;
+  all:unset; box-sizing:border-box; display:block; width:100%;
+  padding:.6rem .8rem; border-radius:var(--radius);
+  cursor:pointer; background:var(--card);
+  white-space:normal; overflow-wrap:anywhere; word-break:break-word;
+  transition:background .15s;
 }
-.menu-item:hover{ background: #1e232c; }
-.menu-item.active{
-  background: #e5e7eb; /* ChatGPT風 背景色 */
-  color: #000;
-}
+.menu-item:hover{ background:#1e232c; }
+.menu-item.active{ background:#e5e7eb; color:#000; }
 .menu-note{ color:var(--muted); font-size:.9rem; margin:1rem 0; }
 
 /* Main */
@@ -123,10 +108,7 @@ main{
   cursor:pointer;
 }
 .toggle:hover{ background:#171c25; border-color:#303a49 }
-.toggle.active{
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent) inset;
-}
+.toggle.active{ border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 .toggle:disabled{ opacity:.55; cursor:not-allowed }
 .ctl{ display:flex; flex-direction:column; gap:.35rem; }
 .ctl > span{ font-size:.85rem; color:var(--muted); }
@@ -172,9 +154,7 @@ main{
 .detail-video iframe{ width:100%; aspect-ratio:16/9; border:0; background:#000 }
 
 /* SNS buttons */
-.detail-sns{
-  display:flex; flex-wrap:wrap; gap:.5rem;
-}
+.detail-sns{ display:flex; flex-wrap:wrap; gap:.5rem; }
 .detail-sns .sns{
   display:inline-flex; align-items:center; justify-content:center;
   padding:.5rem .75rem; border:1px solid var(--border);
@@ -183,11 +163,6 @@ main{
 }
 .detail-sns .sns:hover{ background:#171c25; border-color:#303a49 }
 .detail-sns .sns:active{ transform:translateY(1px) }
-.detail-sns .sns.yt,
-.detail-sns .sns.ig,
-.detail-sns .sns.x,
-.detail-sns .sns.tk,
-.detail-sns .sns.web{ color:#e6e9ef; }
 
 /* Favorite button */
 .fav-btn{
@@ -198,6 +173,26 @@ main{
   display:flex; align-items:center; justify-content:center;
 }
 .fav-btn.on{ background:#1e2230; border-color:#3a4253; }
+
+/* ===== 動画一覧 ===== */
+.video-groups{ display:grid; gap:1rem; }
+.video-group h4{ margin:.2rem 0 .4rem; color:var(--muted); font-weight:600; }
+.video-grid{
+  display:grid; gap:.6rem;
+  grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+}
+.vcard{
+  display:grid; gap:.35rem;
+  border:1px solid var(--border);
+  background:#12161e; border-radius:.6rem;
+  padding:.45rem; text-decoration:none; color:inherit;
+  transition:background .15s, border-color .15s, transform .02s;
+}
+.vcard:hover{ background:#171c25; border-color:#303a49 }
+.vthumb{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:.4rem; background:#000; }
+.vt{ font-size:.95rem; font-weight:600; line-height:1.35; }
+.vm{ font-size:.8rem; color:var(--muted); }
+.video-loading{ padding:.6rem .4rem; color:var(--muted); }
 
 /* ===== Modal (login) ===== */
 .modal-backdrop{
@@ -219,7 +214,7 @@ main{
 .modal .actions{ display:flex; gap:.5rem; justify-content:flex-end; margin-top:.8rem; }
 .link-like{ background:transparent; border:0; color:var(--muted); cursor:pointer; }
 
-/* ===== Toast ===== */
+/* ===== Toast（auth.jsが出すトースト用） ===== */
 .toast{
   position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(16px);
   background:#222833; color:#e6e9ef; border:1px solid #2b3341; border-radius:.6rem;
