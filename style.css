@@ -174,24 +174,22 @@ main{
 }
 .fav-btn.on{ background:#1e2230; border-color:#3a4253; }
 
-/* ===== 動画一覧 ===== */
+/* ===== 動画一覧（その場再生用） ===== */
 .video-groups{ display:grid; gap:1rem; }
 .video-group h4{ margin:.2rem 0 .4rem; color:var(--muted); font-weight:600; }
-.video-grid{
-  display:grid; gap:.6rem;
-  grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
-}
-.vcard{
-  display:grid; gap:.35rem;
-  border:1px solid var(--border);
-  background:#12161e; border-radius:.6rem;
-  padding:.45rem; text-decoration:none; color:inherit;
-  transition:background .15s, border-color .15s, transform .02s;
-}
-.vcard:hover{ background:#171c25; border-color:#303a49 }
-.vthumb{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:.4rem; background:#000; }
-.vt{ font-size:.95rem; font-weight:600; line-height:1.35; }
-.vm{ font-size:.8rem; color:var(--muted); }
+.video-grid{ display:grid; gap:.6rem; }
+
+/* カード型（その場再生） */
+.v-card{display:flex; gap:.6rem; align-items:flex-start; padding:.45rem; border:1px solid var(--border); background:#12161e; border-radius:.6rem;}
+.v-thumb{position:relative; border:0; padding:0; background:transparent; cursor:pointer}
+.v-thumb img{width:160px; height:90px; object-fit:cover; display:block; border-radius:.4rem; border:1px solid var(--border)}
+.v-play{position:absolute; right:.4rem; bottom:.4rem; background:rgba(0,0,0,.6); color:#fff; border-radius:.4rem; padding:.1rem .35rem; font-size:.85rem}
+.v-embed iframe{width:160px; height:90px; border:0; border-radius:.4rem}
+.v-meta{flex:1; min-width:0}
+.v-title{color:var(--fg); text-decoration:none}
+.v-title:hover{text-decoration:underline}
+.v-date{color:var(--muted); font-size:.85rem; margin-top:.2rem}
+
 .video-loading{ padding:.6rem .4rem; color:var(--muted); }
 
 /* ===== Modal (login) ===== */
