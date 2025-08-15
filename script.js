@@ -7,12 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileEl  = $("#profile");
 
   // toolbar
-  const qEl        = $("#q");                // 検索入力（無くてもOK）
+  const qEl        = $("#q");                // 検索入力
   const countrySel = $("#filterCountry");
   const ageMinEl   = $("#ageMin");
   const ageMaxEl   = $("#ageMax");
   const sortSel    = $("#sortBy");
-  const favOnlyBtn = $("#favOnlyBtn");       // “お気に入りのみ”ボタン（無くてもOK）
+  const favOnlyBtn = $("#favOnlyBtn");
 
   /* ---------- 状態 ---------- */
   let LIST = [];
@@ -27,16 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const norm    = s => (s ?? "").toString().toLowerCase();  // 小文字化
   const byNameAsc  = (a,b)=> a.name.localeCompare(b.name, 'ja', {sensitivity:'base'});
   const byNameDesc = (a,b)=> b.name.localeCompare(a.name, 'ja', {sensitivity:'base'});
+  const escapeHTML = (s='') => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // 軽いデバウンス（タイピング中の過描画防止）
-  const debounce = (fn, ms=120) => {
-    let t; return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), ms); };
-  };
+  const debounce = (fn, ms=120) => { let t; return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), ms); }; };
 
   function thumbHTML(id, alt){
     const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-    return `<img class="thumb" src="${max}" onerror="this.onerror=null;this.src='${hq}'" alt="${alt}">`;
+    return `<img class="thumb" src="${max}" onerror="this.onerror=null;this.src='${hq}'" alt="${escapeHTML(alt)}">`;
   }
   function iframe(id){
     return `<iframe src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
@@ -47,21 +46,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!birthdate) return undefined;
     const m = String(birthdate).trim().match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
     if (!m) return undefined;
-
     const y  = Number(m[1]);
     const mo = Number(m[2]);
     const d  = Number(m[3]);
     if (!y || !mo || !d) return undefined;
-
     const today = new Date(asOf.getFullYear(), asOf.getMonth(), asOf.getDate());
     const bday  = new Date(y, mo - 1, d);
-
     let age = today.getFullYear() - bday.getFullYear();
     const beforeBirthday =
       today.getMonth() < bday.getMonth() ||
       (today.getMonth() === bday.getMonth() && today.getDate() < d);
     if (beforeBirthday) age--;
-
     return Number.isFinite(age) ? age : undefined;
   }
 
@@ -82,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const { data, error } = await sb
       .from('favorites')
       .select('slug')
-      .eq('user_id', user.id)                 // ← 重要：自分の分だけ取得
+      .eq('user_id', user.id)                 // 自分の分だけ取得
       .order('created_at', { ascending: false });
 
     FAVORITES = (!error && Array.isArray(data)) ? new Set(data.map(r => r.slug)) : new Set();
@@ -97,9 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (FAVORITES.has(slug)) {
       const { error } = await sb.from('favorites')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('slug', slug);
+        .delete().eq('user_id', user.id).eq('slug', slug);
       if (!error) FAVORITES.delete(slug);
     } else {
       const { error } = await sb.from('favorites')
@@ -155,14 +148,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const favOn   = FAVORITES.has(p.slug);
     const favLbl  = favOn ? "★" : "☆";
     const favCls  = favOn ? "fav-btn on" : "fav-btn";
-
     return `
       <article class="card">
         <button class="${favCls}" data-slug="${p.slug}" aria-label="お気に入り">${favLbl}</button>
         <div onclick="playVideo('${p.ytId}', this)">${thumbHTML(p.ytId, p.name)}</div>
         <div class="pad">
           <div class="name">
-            <a href="#p=${p.slug}" class="link-to-detail">${p.name}</a>（${p.country}）
+            <a href="#p=${p.slug}" class="link-to-detail">${escapeHTML(p.name)}</a>（${escapeHTML(p.country)}）
           </div>
           <div class="stats">
             <div class="stat"><b>年齢：</b>${ageText}</div>
@@ -176,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const min = parseInt(ageMinEl.value,10);
     const max = parseInt(ageMaxEl.value,10);
     const sort = sortSel.value || "name-asc";
-    const q = norm(qEl?.value || "");          // 検索語
+    const q = norm(qEl?.value || "");
     return {
       country,
       min: Number.isFinite(min)?min:undefined,
@@ -199,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (country!=="All" && p.country!==country) return false;
       if (Number.isFinite(min) && !(Number.isFinite(p._age) && p._age>=min)) return false;
       if (Number.isFinite(max) && !(Number.isFinite(p._age) && p._age<=max)) return false;
-      if (FAV_ONLY && !FAVORITES.has(p.slug)) return false; // ← 追加：お気に入りのみ
+      if (FAV_ONLY && !FAVORITES.has(p.slug)) return false; // お気に入りのみ
       return true;
     });
 
@@ -207,12 +199,74 @@ document.addEventListener('DOMContentLoaded', () => {
     listEl.innerHTML = out.map(cardHTML).join("");
   }
 
+  /* ---------- 動画セクション ---------- */
+  function videosSectionHTML(){
+    return `
+      <section class="detail-section">
+        <h3>動画</h3>
+        <div class="video-groups">
+          <div class="video-group">
+            <h4>個人チャンネル</h4>
+            <div id="vb-personal" class="video-grid"></div>
+          </div>
+          <div class="video-group">
+            <h4>Swissbeatbox</h4>
+            <div id="vb-swiss" class="video-grid"></div>
+          </div>
+          <div class="video-group">
+            <h4>その他</h4>
+            <div id="vb-others" class="video-grid"></div>
+          </div>
+        </div>
+      </section>`;
+  }
+
+  function renderVideoBucket(bucketId, items){
+    const el = document.getElementById(bucketId);
+    if (!el) return;
+    if (!items || items.length === 0){
+      el.innerHTML = `<p class="meta">該当する動画が見つかりませんでした。</p>`;
+      return;
+    }
+    el.innerHTML = items.map(v => `
+      <a class="vcard" href="https://www.youtube.com/watch?v=${v.videoId}" target="_blank" rel="noopener">
+        <img class="vthumb" src="${v.thumbnail}" alt="${escapeHTML(v.title)}">
+        <div class="vt">${escapeHTML(v.title)}</div>
+        <div class="vm">${escapeHTML(v.channelTitle)}・${escapeHTML((v.publishedAt||'').slice(0,10))}</div>
+      </a>
+    `).join('');
+  }
+
+  function setVideoLoading(){
+    ["vb-personal","vb-swiss","vb-others"].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `<div class="video-loading">読み込み中…</div>`;
+    });
+  }
+
+  async function loadVideosFor(p){
+    try{
+      setVideoLoading();
+      const body = { name: p.name, slug: p.slug, yt: p.socials?.youtube || null };
+      const { data, error } = await sb.functions.invoke('yt-search', { body });
+      if (error) throw error;
+      renderVideoBucket('vb-personal', data.personal);
+      renderVideoBucket('vb-swiss',   data.swissbeatbox);
+      renderVideoBucket('vb-others',  data.others);
+    }catch(e){
+      console.error(e);
+      renderVideoBucket('vb-personal', []);
+      renderVideoBucket('vb-swiss',   []);
+      renderVideoBucket('vb-others',  []);
+    }
+  }
+
   /* ---------- 詳細 ---------- */
   function detailHTML(p){
     const age = calcAge(p.birthdate);
     const ageLine = Number.isFinite(age) ? `<div><span>年齢</span><strong>${age}</strong></div>` : "";
-    const bdLine  = (p.birthdate && /\d/.test(p.birthdate)) ? `<div><span>生年月日</span><strong>${p.birthdate}</strong></div>` : "";
-    const countryLine = p.country ? `<div><span>国籍</span><strong>${p.country}</strong></div>` : "";
+    const bdLine  = (p.birthdate && /\d/.test(p.birthdate)) ? `<div><span>生年月日</span><strong>${escapeHTML(p.birthdate)}</strong></div>` : "";
+    const countryLine = p.country ? `<div><span>国籍</span><strong>${escapeHTML(p.country)}</strong></div>` : "";
 
     const s = p.socials || {};
     const snsItems = [
@@ -245,15 +299,19 @@ document.addEventListener('DOMContentLoaded', () => {
            <div class="detail-basics">${countryLine}${bdLine}${ageLine}</div>
          </section>` : "";
 
+    /* ここで動画セクション（個人/SBB/その他）を差し込む */
+    const groupedVideos = videosSectionHTML();
+
     return `
       <header class="detail-head">
         <div class="detail-title">
-          <h2>${p.name || ""}</h2>
+          <h2>${escapeHTML(p.name || "")}</h2>
         </div>
       </header>
       ${basicsBlock}
       ${snsBlock}
       ${videoBlock}
+      ${groupedVideos}
     `;
   }
 
@@ -262,6 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const p = await loadProfile(slug);
       profileEl.innerHTML = detailHTML(p);
       listView.hidden = true; detailView.hidden = false;
+      // ← ここで Edge Function を呼んで3カテゴリの動画を埋める
+      loadVideosFor(p);
     }catch(e){
       console.error(e); showList();
     }
@@ -330,25 +390,5 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   })();
-
-
-    // 例: 詳細ページ表示時
-  async function loadVideosFor(p){
-    try{
-      const body = { name: p.name, slug: p.slug, yt: p.socials?.youtube || null };
-      const { data, error } = await sb.functions.invoke('yt-search', { body });
-      if (error) throw error;
-  
-      renderVideoBucket('vb-personal', data.personal);
-      renderVideoBucket('vb-swiss',   data.swissbeatbox);
-      renderVideoBucket('vb-others',  data.others);
-    }catch(e){
-      console.error(e);
-      renderVideoBucket('vb-personal', []);
-      renderVideoBucket('vb-swiss',   []);
-      renderVideoBucket('vb-others',  []);
-    }
-  }
-
 
 });
