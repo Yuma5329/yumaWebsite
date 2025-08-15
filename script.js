@@ -221,20 +221,40 @@ document.addEventListener('DOMContentLoaded', () => {
       </section>`;
   }
 
+  // ▼ その場再生するUI（サムネ=ボタン／タイトル=YouTube新規タブ）
+  function escapeHtml(s=""){
+    return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
   function renderVideoBucket(bucketId, items){
-    const el = document.getElementById(bucketId);
-    if (!el) return;
-    if (!items || items.length === 0){
-      el.innerHTML = `<p class="meta">該当する動画が見つかりませんでした。</p>`;
+    const box = document.getElementById(bucketId);
+    if (!box) return;
+
+    if (!items || !items.length){
+      box.innerHTML = `<p class="meta">該当する動画が見つかりませんでした。</p>`;
       return;
     }
-    el.innerHTML = items.map(v => `
-      <a class="vcard" href="https://www.youtube.com/watch?v=${v.videoId}" target="_blank" rel="noopener">
-        <img class="vthumb" src="${v.thumbnail}" alt="${escapeHTML(v.title)}">
-        <div class="vt">${escapeHTML(v.title)}</div>
-        <div class="vm">${escapeHTML(v.channelTitle)}・${escapeHTML((v.publishedAt||'').slice(0,10))}</div>
-      </a>
-    `).join('');
+
+    box.innerHTML = items.map(v => {
+      const vid  = (v.videoId || v.id || "").trim();
+      const safeVid = encodeURIComponent(vid);
+      const title = escapeHtml(v.title || "");
+      const thumb = v.thumbnail || `https://i.ytimg.com/vi/${safeVid}/hqdefault.jpg`;
+      const date  = v.publishedAt ? new Date(v.publishedAt).toLocaleDateString('ja-JP') : "";
+      const ch    = escapeHtml(v.channelTitle || "");
+
+      return `
+        <article class="v-card" data-vid="${safeVid}">
+          <button type="button" class="v-thumb" aria-label="再生">
+            <img src="${thumb}" alt="${title}">
+            <span class="v-play">▶</span>
+          </button>
+          <div class="v-meta">
+            <a class="v-title" href="https://www.youtube.com/watch?v=${safeVid}" target="_blank" rel="noopener noreferrer">${title}</a>
+            <div class="v-date">${ch}${date ? ` ・ ${date}` : ""}</div>
+          </div>
+        </article>`;
+    }).join("");
   }
 
   function setVideoLoading(){
@@ -299,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
            <div class="detail-basics">${countryLine}${bdLine}${ageLine}</div>
          </section>` : "";
 
-    /* ここで動画セクション（個人/SBB/その他）を差し込む */
     const groupedVideos = videosSectionHTML();
 
     return `
@@ -320,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const p = await loadProfile(slug);
       profileEl.innerHTML = detailHTML(p);
       listView.hidden = true; detailView.hidden = false;
-      // ← ここで Edge Function を呼んで3カテゴリの動画を埋める
+      // 動画を読み込み
       loadVideosFor(p);
     }catch(e){
       console.error(e); showList();
@@ -373,6 +392,21 @@ document.addEventListener('DOMContentLoaded', () => {
       renderList();
     });
   }
+
+  // ▼ プロフィール内：サムネをクリックしたらその場再生に差し替え
+  profileEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.v-thumb');
+    if (!btn) return;
+    const card = btn.closest('.v-card');
+    const vid  = card?.dataset.vid;
+    if (!vid) return;
+
+    btn.outerHTML = `
+      <div class="v-embed">
+        <iframe src="https://www.youtube.com/embed/${vid}?autoplay=1"
+          allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>`;
+  });
 
   /* ---------- 初期化 ---------- */
   (async ()=>{
