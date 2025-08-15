@@ -7,12 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileEl  = $("#profile");
 
   // toolbar
-  const qEl        = $("#q");      // ← 追加：検索入力
+  const qEl        = $("#q");                // 検索入力（無くてもOK）
   const countrySel = $("#filterCountry");
   const ageMinEl   = $("#ageMin");
   const ageMaxEl   = $("#ageMax");
   const sortSel    = $("#sortBy");
-  const favOnlyBtn = $("#favOnlyBtn");   // ← ツールバーに“お気に入りのみ”ボタンがあれば取得
+  const favOnlyBtn = $("#favOnlyBtn");       // “お気に入りのみ”ボタン（無くてもOK）
 
   /* ---------- 状態 ---------- */
   let LIST = [];
@@ -23,10 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let FAV_ONLY  = false;       // “お気に入りのみ表示”フラグ
 
   /* ---------- ユーティリティ ---------- */
-  const slugify     = s => (s||"").toLowerCase().replace(/[^a-z0-9\-]/g,'');
-  const norm = (s) => (s ?? "").toString().toLowerCase();  // ← 追加：小文字化ヘルパ
-  const byNameAsc   = (a,b)=> a.name.localeCompare(b.name, 'ja', {sensitivity:'base'});
-  const byNameDesc  = (a,b)=> b.name.localeCompare(a.name, 'ja', {sensitivity:'base'});
+  const slugify = s => (s||"").toLowerCase().replace(/[^a-z0-9\-]/g,'');
+  const norm    = s => (s ?? "").toString().toLowerCase();  // 小文字化
+  const byNameAsc  = (a,b)=> a.name.localeCompare(b.name, 'ja', {sensitivity:'base'});
+  const byNameDesc = (a,b)=> b.name.localeCompare(a.name, 'ja', {sensitivity:'base'});
+
+  // 軽いデバウンス（タイピング中の過描画防止）
+  const debounce = (fn, ms=120) => {
+    let t; return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), ms); };
+  };
 
   function thumbHTML(id, alt){
     const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
@@ -77,7 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const { data, error } = await sb
       .from('favorites')
       .select('slug')
+      .eq('user_id', user.id)                 // ← 重要：自分の分だけ取得
       .order('created_at', { ascending: false });
+
     FAVORITES = (!error && Array.isArray(data)) ? new Set(data.map(r => r.slug)) : new Set();
     updateFavOnlyUI();
   }
@@ -169,13 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const min = parseInt(ageMinEl.value,10);
     const max = parseInt(ageMaxEl.value,10);
     const sort = sortSel.value || "name-asc";
-    const q = norm(qEl?.value || "");          // ← 追加
+    const q = norm(qEl?.value || "");          // 検索語
     return {
       country,
       min: Number.isFinite(min)?min:undefined,
       max: Number.isFinite(max)?max:undefined,
       sort,
-      q                                      // ← 追加
+      q
     };
   }
 
@@ -185,16 +192,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderList(){
-    const {country, min, max, sort, q} = currentFilters();  // ← q を受け取る
-  
+    const {country, min, max, sort, q} = currentFilters();
+
     let out = LIST.filter(p=>{
-      if (q && !norm(p.name).includes(q)) return false;     // ← 追加：名前部分一致
+      if (q && !norm(p.name).includes(q)) return false;     // 名前部分一致
       if (country!=="All" && p.country!==country) return false;
       if (Number.isFinite(min) && !(Number.isFinite(p._age) && p._age>=min)) return false;
       if (Number.isFinite(max) && !(Number.isFinite(p._age) && p._age<=max)) return false;
+      if (FAV_ONLY && !FAVORITES.has(p.slug)) return false; // ← 追加：お気に入りのみ
       return true;
     });
-  
+
     applySort(out, sort);
     listEl.innerHTML = out.map(cardHTML).join("");
   }
@@ -268,7 +276,13 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('hashchange', routeFromHash);
 
   /* ---------- イベント ---------- */
-  [qEl, countrySel, ageMinEl, ageMaxEl, sortSel].forEach(el=>{
+  // 検索は入力中はデバウンス、確定（change）やEnterで即反映
+  if (qEl) {
+    qEl.addEventListener('input', debounce(renderList, 120));
+    qEl.addEventListener('change', renderList);
+    qEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') e.preventDefault(); });
+  }
+  [countrySel, ageMinEl, ageMaxEl, sortSel].forEach(el=>{
     el?.addEventListener('input', renderList);
     el?.addEventListener('change', renderList);
   });
@@ -304,9 +318,11 @@ document.addEventListener('DOMContentLoaded', () => {
   (async ()=>{
     await loadManifest();
     await loadFavorites();      // ログイン済みならお気に入り取得
+    updateFavOnlyUI();
     renderList();
     routeFromHash();
 
+    // ログイン状態が変わったらお気に入りを取り直して反映
     if (window.sb && sb.auth?.onAuthStateChange) {
       sb.auth.onAuthStateChange(async ()=>{
         await loadFavorites();
