@@ -10,9 +10,6 @@
 
     <!-- Header -->
     <header>
-      <!-- サイドバー開閉ボタン -->
-      <button id="sidebarToggle" class="icon-btn" type="button" aria-label="サイドバーを開閉" aria-expanded="true">≡</button>
-
       <h1>Beatboxer図鑑</h1>
       <div id="authArea" style="margin-left:auto; display:flex; gap:.5rem; align-items:center;">
         <span id="userEmail" class="meta"></span>
@@ -23,11 +20,19 @@
 
     <!-- Sidebar -->
     <aside id="sidebar" aria-label="メニュー">
+      <div class="sidebar-header">
+        <button id="sidebarToggle" class="sb-toggle" type="button"
+                aria-label="サイドバーを閉じる" aria-expanded="true">← 折りたたむ</button>
+      </div>
       <nav class="menu">
         <button class="menu-item active" id="menuHome">Beatboxer一覧</button>
       </nav>
       <footer class="menu-note">今後ここに他メニューを追加予定</footer>
     </aside>
+
+    <!-- 折りたたみ時にだけ出る取っ手 -->
+    <button id="sidebarHandle" class="sb-handle" type="button"
+            aria-label="サイドバーを開く">→ ひらく</button>
 
     <!-- Main -->
     <main>
@@ -39,22 +44,18 @@
             <span>名前に含む</span>
             <input id="q" type="search" placeholder="例: so, napom, wing">
           </label>
-
           <label class="ctl">
             <span>国籍</span>
             <select id="filterCountry"></select>
           </label>
-
           <label class="ctl">
             <span>年齢（最小）</span>
             <input id="ageMin" type="number" inputmode="numeric" placeholder="任意">
           </label>
-
           <label class="ctl">
             <span>年齢（最大）</span>
             <input id="ageMax" type="number" inputmode="numeric" placeholder="任意">
           </label>
-
           <label class="ctl">
             <span>並び替え</span>
             <select id="sortBy">
@@ -62,7 +63,6 @@
               <option value="name-desc">名前：Z → A</option>
             </select>
           </label>
-
           <button id="favOnlyBtn" type="button" class="toggle fav">☆ お気に入りのみ</button>
         </div>
 
@@ -76,7 +76,6 @@
         </nav>
         <article id="profile" class="detail"></article>
       </section>
-
     </main>
   </div>
 
