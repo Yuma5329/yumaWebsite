@@ -13,6 +13,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const ageMaxEl   = $("#ageMax");
   const sortSel    = $("#sortBy");
   const favOnlyBtn = $("#favOnlyBtn");
+  
+    // === サイドバー開閉（サイドバー上部のボタン＋取っ手） ===
+  const body = document.body;
+  const sbToggle = document.getElementById('sidebarToggle'); // サイドバー内のボタン
+  const sbHandle = document.getElementById('sidebarHandle'); // 折りたたみ時の取っ手
+
+  const setToggleLabel = () => {
+    const collapsed = body.classList.contains('sidebar-collapsed');
+    if (collapsed) {
+      sbToggle?.setAttribute('aria-expanded','false');
+      sbToggle && (sbToggle.textContent = '→ ひらく');
+      sbToggle?.setAttribute('aria-label','サイドバーを開く');
+      sbHandle && (sbHandle.textContent = '→ ひらく');
+    } else {
+      sbToggle?.setAttribute('aria-expanded','true');
+      sbToggle && (sbToggle.textContent = '← 折りたたむ');
+      sbToggle?.setAttribute('aria-label','サイドバーを閉じる');
+      sbHandle && (sbHandle.textContent = '→ ひらく');
+    }
+  };
+
+  // 前回状態を復元
+  const savedSB = localStorage.getItem('sidebar-collapsed') === '1';
+  if (savedSB) body.classList.add('sidebar-collapsed');
+  setToggleLabel();
+
+  const toggleSidebar = () => {
+    const collapsed = body.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+    setToggleLabel();
+  };
+
+  sbToggle?.addEventListener('click', toggleSidebar);
+  sbHandle?.addEventListener('click', toggleSidebar);
 
   /* ---------- 状態 ---------- */
   let LIST = [];
