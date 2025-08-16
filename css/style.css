@@ -1,0 +1,6 @@
+/* style.css: 入口だけ。HTMLの<link>はこのままでOK */
+@import url("./base.css");
+@import url("./layout.css");
+@import url("./components.css");
+@import url("./detail.css");
+@import url("./modal.css");
