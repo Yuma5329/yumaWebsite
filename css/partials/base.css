@@ -1,0 +1,31 @@
+/* ===== base.css ===== */
+
+/* Theme variables */
+:root{
+  --bg:#0e1116; --card:#151a22; --elev:#0b0e13;
+  --fg:#e6e9ef; --muted:#9aa6b2;
+  --border:#232a35; --border-soft:#1c222c; --accent:#7aa7ff;
+
+  --headerH: clamp(3rem, 6vw, 4.2rem);
+  --sidebarW: clamp(14rem, 20vw, 18rem);
+  --radius:.75rem; --gap: clamp(.6rem, 1.2vw, .9rem);
+  --shadow: 0 6px 16px rgba(0,0,0,.25);
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg); color:var(--fg);
+  overflow:hidden;
+}
+[hidden]{ display:none !important; }
+
+/* Scrollbar (Firefox & WebKit) */
+*{ scrollbar-color:#3a4352 transparent; scrollbar-width:thin; }
+::-webkit-scrollbar{ width:8px; height:8px; }
+::-webkit-scrollbar-thumb{
+  background:#3a4352; border-radius:999px;
+  border:2px solid transparent; background-clip:content-box;
+}
