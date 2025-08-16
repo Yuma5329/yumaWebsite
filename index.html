@@ -10,8 +10,8 @@
 
     <!-- Header -->
     <header>
-      <!-- 追加：サイドバー開閉ボタン -->
-      <button id="sidebarToggle" class="btn icon-btn" type="button" aria-controls="sidebar" aria-expanded="true" title="サイドバーを開閉">☰</button>
+      <!-- サイドバー開閉ボタン -->
+      <button id="sidebarToggle" class="icon-btn" type="button" aria-label="サイドバーを開閉" aria-expanded="true">≡</button>
 
       <h1>Beatboxer図鑑</h1>
       <div id="authArea" style="margin-left:auto; display:flex; gap:.5rem; align-items:center;">
@@ -21,7 +21,7 @@
       </div>
     </header>
 
-    <!-- Sidebar（メニューのみ） -->
+    <!-- Sidebar -->
     <aside id="sidebar" aria-label="メニュー">
       <nav class="menu">
         <button class="menu-item active" id="menuHome">Beatboxer一覧</button>
@@ -34,14 +34,12 @@
 
       <!-- 一覧 -->
       <section id="listView">
-        <!-- ツールバー -->
         <div id="toolbar" class="toolbar">
-          
           <label class="ctl">
             <span>名前に含む</span>
             <input id="q" type="search" placeholder="例: so, napom, wing">
           </label>
-          
+
           <label class="ctl">
             <span>国籍</span>
             <select id="filterCountry"></select>
@@ -65,7 +63,6 @@
             </select>
           </label>
 
-          <!-- お気に入りのみ表示トグル -->
           <button id="favOnlyBtn" type="button" class="toggle fav">☆ お気に入りのみ</button>
         </div>
 
@@ -79,6 +76,7 @@
         </nav>
         <article id="profile" class="detail"></article>
       </section>
+
     </main>
   </div>
 
@@ -107,9 +105,9 @@
     </div>
   </div>
 
-  <!-- Supabase UMD（先に読み込む） -->
+  <!-- Supabase UMD -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- 認証まわり -->
+  <!-- 認証 -->
   <script src="auth.js"></script>
   <!-- アプリ本体 -->
   <script src="script.js"></script>
