@@ -20,7 +20,7 @@ body{
 }
 [hidden]{ display:none !important; }
 
-/* Scrollbar (軽量) */
+/* Scrollbar */
 *{scrollbar-color:#3a4352 transparent; scrollbar-width:thin}
 main:hover { scrollbar-color:#556176 transparent; }
 ::-webkit-scrollbar{width:8px;height:8px}
@@ -193,20 +193,36 @@ main{
 .v-date{ font-size:.8rem; color:var(--muted); }
 .video-loading{ padding:.6rem .4rem; color:var(--muted); }
 
+/* ===== Modal (login) ===== */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.5);
+  display:flex; align-items:center; justify-content:center;
+  z-index:2000;        /* 画面最前面に */
+}
+.modal{
+  background:var(--card); color:var(--fg);
+  border:1px solid var(--border); border-radius:.75rem;
+  width:min(480px, 92vw); padding:1rem; box-shadow:0 10px 24px rgba(0,0,0,.35);
+}
+.modal h3{ margin:.2rem 0 1rem; }
+.modal .row{ display:flex; flex-direction:column; gap:.35rem; margin:.6rem 0; }
+.modal input{
+  padding:.6rem .7rem; border:1px solid var(--border);
+  border-radius:.6rem; background:var(--bg); color:inherit;
+}
+.modal .actions{ display:flex; gap:.5rem; justify-content:flex-end; margin-top:.8rem; }
+.link-like{ background:transparent; border:0; color:var(--muted); cursor:pointer; }
+
 /* ===== Toast ===== */
 .toast{
   position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(16px);
   background:#222833; color:#e6e9ef; border:1px solid #2b3341; border-radius:.6rem;
   padding:.6rem .8rem; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
-  z-index:1000;
+  z-index:2100;
 }
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* ===== Sidebar collapsed ===== */
-body.sidebar-collapsed .layout{
-  grid-template-columns:0 minmax(0,1fr);
-}
-body.sidebar-collapsed #sidebar{
-  width:0; padding:0; border-right:none; overflow:hidden;
-}
+body.sidebar-collapsed .layout{ grid-template-columns:0 minmax(0,1fr); }
+body.sidebar-collapsed #sidebar{ width:0; padding:0; border-right:none; overflow:hidden; }
 body.sidebar-collapsed .sb-handle{ display:block; }
