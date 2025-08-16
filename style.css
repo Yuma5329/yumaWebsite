@@ -20,7 +20,7 @@ body{
 }
 [hidden]{ display:none !important; }
 
-/* Scrollbar */
+/* Scrollbar (軽量) */
 *{scrollbar-color:#3a4352 transparent; scrollbar-width:thin}
 main:hover { scrollbar-color:#556176 transparent; }
 ::-webkit-scrollbar{width:8px;height:8px}
@@ -52,7 +52,7 @@ h1{margin:0; font-size:clamp(1.1rem,2.2vw,1.4rem); font-weight:700; letter-spaci
   transition:background .15s,border-color .15s,transform .02s
 }
 
-/* Sidebar */
+/* ===== Sidebar ===== */
 aside#sidebar{
   grid-column:1; grid-row:2;
   background:var(--card);
@@ -63,9 +63,7 @@ aside#sidebar{
   border-right:1px solid var(--border-soft);
   overflow:auto;
 }
-.sidebar-header{
-  display:flex; justify-content:flex-end; margin-bottom:.4rem;
-}
+.sidebar-header{ display:flex; justify-content:flex-end; margin-bottom:.4rem; }
 .sb-toggle{
   border:1px solid var(--border); background:#12161e; color:var(--fg);
   border-radius:.6rem; padding:.4rem .6rem; cursor:pointer; font-size:.9rem;
@@ -76,7 +74,7 @@ aside#sidebar{
   position:fixed; left:6px; top:calc(var(--headerH) + 8px);
   padding:.35rem .55rem; border:1px solid var(--border); border-radius:.6rem;
   background:var(--card); color:var(--fg); cursor:pointer; z-index:20;
-  display:none; /* デフォルト非表示 */
+  display:none;
 }
 
 /* Sidebar content */
@@ -91,7 +89,7 @@ aside#sidebar{
 .menu-item.active{ background:#e5e7eb; color:#000; }
 .menu-note{ color:var(--muted); font-size:.9rem; margin:1rem 0; }
 
-/* Main */
+/* ===== Main ===== */
 main{
   grid-column:2; grid-row:2; min-width:0;
   padding:clamp(.8rem,1.5vw,1.2rem);
@@ -99,7 +97,7 @@ main{
   overflow-y:auto;
 }
 
-/* Toolbar / Grid / Card / Detail …（既存のまま） */
+/* ===== Toolbar / Grid / Card ===== */
 .toolbar{
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
@@ -113,19 +111,87 @@ main{
 .ctl{ display:flex; flex-direction:column; gap:.35rem; }
 .ctl > span{ font-size:.85rem; color:var(--muted); }
 .ctl select, .ctl input{ width:100%; padding:.55rem .7rem; border:1px solid var(--border); border-radius:var(--radius); background:var(--card); color:var(--fg); }
+
 .grid{display:grid; gap:var(--gap)}
 @media (min-width:1200px){.grid{grid-template-columns:repeat(4,1fr)}}
 @media (min-width:900px) and (max-width:1199px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media (min-width:600px) and (max-width:899px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:599px){.grid{grid-template-columns:1fr}}
 
-.card{ position:relative; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+.card{
+  position:relative; background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
+}
 .thumb, iframe{ width:100%; aspect-ratio:16/9; border:0; background:#000; display:block; object-fit:cover }
-.fav-btn{ position:absolute; top:.5rem; right:.5rem; width:2.1rem; height:2.1rem; border:1px solid var(--border); border-radius:999px; background:#12161e; color:#ffd66b; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.fav-btn{
+  position:absolute; top:.5rem; right:.5rem;
+  width:2.1rem; height:2.1rem; border:1px solid var(--border); border-radius:999px;
+  background:#12161e; color:#ffd66b; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
 .fav-btn.on{ background:#1e2230; border-color:#3a4253; }
 
+/* ===== Detail 共通 ===== */
 .detail{ display:grid; gap:1rem }
+.detail-head{ display:flex; align-items:center; gap:1rem; padding:.6rem 0; border-bottom:1px solid var(--border-soft) }
+.detail-title h2{ margin:0; font-size:clamp(1.2rem,2vw,1.5rem) }
+.detail-section{ padding-top:.2rem }
 .detail-section h3{ margin:.2rem 0 .6rem; font-size:1rem; color:var(--muted); font-weight:600 }
+
+/* 基本情報ボックス */
+.detail-basics{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(12rem,1fr));
+  gap:.6rem;
+}
+.detail-basics>div{
+  border:1px solid var(--border);
+  background:#12161e;
+  border-radius:.6rem;
+  padding:.6rem .8rem;
+}
+.detail-basics span{ color:var(--muted); margin-right:.4rem }
+
+/* SNS ボタン */
+.detail-sns{
+  display:flex; flex-wrap:wrap; gap:.5rem;
+}
+.detail-sns .sns{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:.5rem .75rem; border:1px solid var(--border);
+  border-radius:999px; background:#12161e; color:var(--fg);
+  font-size:.9rem; text-decoration:none;
+  transition:background .15s,border-color .15s,transform .02s;
+}
+.detail-sns .sns:hover{ background:#171c25; border-color:#303a49 }
+.detail-sns .sns:active{ transform:translateY(1px) }
+
+/* 代表動画（単体） */
+.detail-videos{ display:grid; gap:.8rem }
+.detail-video iframe{ width:100%; aspect-ratio:16/9; border:0; background:#000 }
+
+/* ===== 動画一覧（個人 / SBB / その他） ===== */
+.video-groups{ display:grid; gap:1rem; }
+.video-group h4{ margin:.2rem 0 .4rem; color:var(--muted); font-weight:600; }
+.video-grid{
+  display:grid; gap:.6rem;
+  grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+}
+.v-card{
+  display:grid; gap:.35rem;
+  border:1px solid var(--border);
+  background:#12161e; border-radius:.6rem;
+  padding:.45rem; color:inherit;
+  transition:background .15s, border-color .15s, transform .02s;
+}
+.v-card:hover{ background:#171c25; border-color:#303a49 }
+.v-thumb{ position:relative; display:block; width:100%; aspect-ratio:16/9; padding:0; border:0; background:transparent; cursor:pointer; }
+.v-thumb img{ width:100%; height:100%; object-fit:cover; border-radius:.4rem; background:#000; display:block; }
+.v-play{ position:absolute; right:.5rem; bottom:.5rem; background:rgba(0,0,0,.6); padding:.15rem .35rem; border-radius:.35rem; font-size:.9rem; }
+.v-meta{ display:grid; gap:.2rem; }
+.v-title{ color:var(--fg); text-decoration:none; font-weight:600; line-height:1.35; }
+.v-title:hover{ text-decoration:underline; }
+.v-date{ font-size:.8rem; color:var(--muted); }
+.video-loading{ padding:.6rem .4rem; color:var(--muted); }
 
 /* ===== Toast ===== */
 .toast{
@@ -143,5 +209,4 @@ body.sidebar-collapsed .layout{
 body.sidebar-collapsed #sidebar{
   width:0; padding:0; border-right:none; overflow:hidden;
 }
-/* 取っ手を表示 */
 body.sidebar-collapsed .sb-handle{ display:block; }
