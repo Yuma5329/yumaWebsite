@@ -40,7 +40,7 @@ aside#sidebar,main{scrollbar-gutter:stable}
   min-height:100vh; width:100vw;
 }
 
-/* Header */
+/* header */
 header{
   grid-column:1/-1; position:sticky; top:0; z-index:10;
   display:flex; align-items:center; gap:var(--gap);
@@ -58,6 +58,7 @@ h1{margin:0; font-size:clamp(1.1rem,2.2vw,1.4rem); font-weight:700; letter-spaci
 }
 .btn:hover{background:#1a202a;border-color:#2b3341}
 .btn:active{transform:translateY(1px)}
+.icon-btn{ width:2.4rem; height:2.4rem; display:inline-flex; align-items:center; justify-content:center; }
 
 /* Sidebar */
 aside#sidebar{
@@ -69,7 +70,19 @@ aside#sidebar{
   height:calc(100vh - var(--headerH));
   border-right:1px solid var(--border-soft);
   overflow:hidden;
+  transition:transform .25s ease;
 }
+
+/* 閉じた状態のレイアウト */
+body.sidebar-collapsed .layout{
+  grid-template-columns:0 minmax(0,1fr);
+}
+body.sidebar-collapsed aside#sidebar{
+  transform:translateX(-100%);
+  pointer-events:none;
+}
+
+/* Menu */
 .menu { display:flex; flex-direction:column; gap:.5rem; padding-right:.4rem; }
 .menu-item{
   all:unset; box-sizing:border-box; display:block; width:100%;
@@ -178,8 +191,6 @@ main{
 .video-groups{ display:grid; gap:1rem; }
 .video-group h4{ margin:.2rem 0 .4rem; color:var(--muted); font-weight:600; }
 .video-grid{ display:grid; gap:.6rem; }
-
-/* カード型（その場再生） */
 .v-card{display:flex; gap:.6rem; align-items:flex-start; padding:.45rem; border:1px solid var(--border); background:#12161e; border-radius:.6rem;}
 .v-thumb{position:relative; border:0; padding:0; background:transparent; cursor:pointer}
 .v-thumb img{width:160px; height:90px; object-fit:cover; display:block; border-radius:.4rem; border:1px solid var(--border)}
@@ -189,7 +200,6 @@ main{
 .v-title{color:var(--fg); text-decoration:none}
 .v-title:hover{text-decoration:underline}
 .v-date{color:var(--muted); font-size:.85rem; margin-top:.2rem}
-
 .video-loading{ padding:.6rem .4rem; color:var(--muted); }
 
 /* ===== Modal (login) ===== */
@@ -212,7 +222,7 @@ main{
 .modal .actions{ display:flex; gap:.5rem; justify-content:flex-end; margin-top:.8rem; }
 .link-like{ background:transparent; border:0; color:var(--muted); cursor:pointer; }
 
-/* ===== Toast（auth.jsが出すトースト用） ===== */
+/* ===== Toast ===== */
 .toast{
   position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(16px);
   background:#222833; color:#e6e9ef; border:1px solid #2b3341; border-radius:.6rem;
