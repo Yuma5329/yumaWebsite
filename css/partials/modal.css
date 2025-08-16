@@ -1,0 +1,65 @@
+/* ================================
+   modal.css
+   - モーダルウィンドウ関連のスタイル
+   - バックドロップ、ボックス、フォーム、アクション
+================================ */
+
+/* === Backdrop (背景の暗幕) === */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* === Modal 本体 === */
+.modal {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: .75rem;
+  width: min(480px, 92vw);
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+}
+
+/* タイトル */
+.modal h3 {
+  margin: .2rem 0 1rem;
+}
+
+/* === コンテンツ構造 === */
+.modal .row {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  margin: .6rem 0;
+}
+
+/* 入力フォーム */
+.modal input {
+  padding: .6rem .7rem;
+  border: 1px solid var(--border);
+  border-radius: .6rem;
+  background: var(--bg);
+  color: inherit;
+}
+
+/* === アクション部分 === */
+.modal .actions {
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end;
+  margin-top: .8rem;
+}
+
+/* キャンセルなどのリンク風ボタン */
+.link-like {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+}
