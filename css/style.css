@@ -1,14 +1,14 @@
 //base.css → リセットCSSや共通の基本スタイル
-@import url('./importcss/base.css');
+@import url('./partials/base.css');
 
 //layout.css → サイドバー、ヘッダー、フッターなどレイアウト系
-@import url('./importcss/layout.css');
+@import url('./partials/layout.css');
 
 //component.css → ボタン、カード、モーダルなど部品系
-@import url('./importcss/component.css');
+@import url('./partials/component.css');
 
 //auth.css → ログイン／新規登録フォーム専用のスタイル
-@import url('./importcss/auth.css');
+@import url('./partials/auth.css');
 
 //theme.css → 色・フォント・変数の定義（ダークモード対応など） 
-@import url('./importcss/theme.css');
+@import url('./partials/theme.css');
