@@ -1,0 +1,174 @@
+/* ================================
+   detail.css
+   - 詳細ページ用のスタイル
+   - 概要、基本情報、SNS、動画表示など
+================================ */
+
+/* === Detail Skeleton === */
+.detail { display: grid; gap: 1rem; }
+
+/* ヘッダー部分 */
+.detail-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.detail-title h2 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+}
+.detail-section { padding-top: .2rem; }
+.detail-section h3 {
+  margin: .2rem 0 .6rem;
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* === Basics Box（プロフィール基本情報） === */
+.detail-basics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: .6rem;
+}
+.detail-basics > div {
+  border: 1px solid var(--border);
+  background: #12161e;
+  border-radius: .6rem;
+  padding: .6rem .8rem;
+}
+.detail-basics span {
+  color: var(--muted);
+  margin-right: .4rem;
+}
+
+/* === SNS Buttons === */
+.detail-sns { display: flex; flex-wrap: wrap; gap: .5rem; }
+.detail-sns .sns {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .5rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #12161e;
+  color: var(--fg);
+  font-size: .9rem;
+  text-decoration: none;
+  transition: background .15s, border-color .15s, transform .02s;
+}
+.detail-sns .sns:hover { background: #171c25; border-color: #303a49; }
+.detail-sns .sns:active { transform: translateY(1px); }
+
+/* === Representative Video（代表動画） === */
+.detail-videos { display: grid; gap: .8rem; }
+.detail-video iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: 0;
+  background: #000;
+}
+
+/* === Grouped Videos (カテゴリ別: personal / swissbeatbox / others) === */
+.video-groups { display: grid; gap: 1rem; }
+.video-group h4 {
+  margin: .2rem 0 .4rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* 動画グリッド */
+.video-grid {
+  display: grid;
+  gap: .6rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+/* === 新しい構造（script.js用） === */
+.v-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: .35rem;
+  border: 1px solid var(--border);
+  background: #12161e;
+  border-radius: .6rem;
+  padding: .45rem;
+  text-decoration: none;
+  color: inherit;
+  transition: background .15s, border-color .15s, transform .02s;
+}
+.v-card:hover { background: #171c25; border-color: #303a49; }
+
+/* サムネイル */
+.v-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.v-thumb img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: .4rem;
+  background: #000;
+  display: block;
+}
+
+/* 再生アイコン */
+.v-play {
+  position: absolute;
+  right: .5rem; bottom: .4rem;
+  font-size: 1rem;
+  background: rgba(0,0,0,.55);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: .2rem .45rem;
+}
+
+/* メタ情報 */
+.v-meta { display: grid; gap: .2rem; }
+.v-title {
+  font-size: .95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: inherit;
+  text-decoration: none;
+}
+.v-title:hover { text-decoration: underline; }
+.v-date { font-size: .8rem; color: var(--muted); }
+
+/* 埋め込み動画 */
+.v-embed iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: 0;
+  background: #000;
+}
+
+/* === 旧クラス互換（残骸対応） === */
+.vcard {
+  display: grid;
+  gap: .35rem;
+  border: 1px solid var(--border);
+  background: #12161e;
+  border-radius: .6rem;
+  padding: .45rem;
+  text-decoration: none;
+  color: inherit;
+}
+.vthumb {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: .4rem;
+  background: #000;
+}
+.vt { font-size: .95rem; font-weight: 600; line-height: 1.35; }
+.vm { font-size: .8rem; color: var(--muted); }
+.video-loading { padding: .6rem .4rem; color: var(--muted); }
