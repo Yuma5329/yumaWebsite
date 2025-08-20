@@ -44,21 +44,23 @@ function setVideoLoading(){
     if (el) el.innerHTML = `<div class="video-loading">読み込み中…</div>`;
   });
 }
+
+import { callFunction } from "../api/functions.js";
+
 async function loadVideosFor(p){
-  try{
-    setVideoLoading();
-    const body = { name: p.name, slug: p.slug, yt: p.socials?.youtube || null };
-    const { data, error } = await sb.functions.invoke('yt-search', { body });
-    if (error) throw error;
-    renderVideoBucket('vb-personal', data.personal);
-    renderVideoBucket('vb-swiss',   data.swissbeatbox);
-    renderVideoBucket('vb-others',  data.others);
-  }catch(e){
-    console.error(e);
-    renderVideoBucket('vb-personal', []);
-    renderVideoBucket('vb-swiss',   []);
-    renderVideoBucket('vb-others',  []);
-  }
+ try{
+   setVideoLoading();
+   const payload = { name: p.name, slug: p.slug, yt: p.socials?.youtube || null };
+   const data = await callFunction("yt-search", payload);
+   renderVideoBucket('vb-personal', data.personal);
+   renderVideoBucket('vb-swiss',   data.swissbeatbox);
+   renderVideoBucket('vb-others',  data.others);
+ }catch(e){
+   console.error(e);
+   renderVideoBucket('vb-personal', []);
+   renderVideoBucket('vb-swiss',   []);
+   renderVideoBucket('vb-others',  []);
+ }
 }
 
 function detailHTML(p){
