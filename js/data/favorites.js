@@ -1,3 +1,5 @@
+ import { sb } from "../api/supabase.js";
+
 // Supabase のお気に入り管理（UI用フラグも保持）
 let FAVORITES = new Set();   // slug の集合
 let FAV_ONLY  = false;       // “お気に入りのみ表示”
