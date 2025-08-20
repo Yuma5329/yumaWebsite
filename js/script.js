@@ -1,10 +1,14 @@
 // ===== script.js =====
+import { $, debounce } from "./utils/dom.js";
+import {
+  slugify, norm, escapeHTML, calcAge,
+  byNameAsc, byNameDesc, thumbHTML, iframe
+} from "./utils/misc.js";
+
 document.addEventListener('DOMContentLoaded', () => {
   /* =========================
    *  要素参照（キャッシュ）
    * ========================= */
-  const $ = (q) => document.querySelector(q);
-
   // Views
   const listEl     = $("#list");
   const listView   = $("#listView");
@@ -58,42 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const PROFILE_CACHE = new Map();       // 詳細キャッシュ
   let FAVORITES = new Set();             // お気に入り slug 集合
   let FAV_ONLY  = false;                 // お気に入りのみ表示フラグ
-
-  /* =========================
-   *  ユーティリティ
-   * ========================= */
-  const slugify   = (s) => (s || "").toLowerCase().replace(/[^a-z0-9\-]/g, '');
-  const norm      = (s) => (s ?? "").toString().toLowerCase();
-  const escapeHTML = (s = "") => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const byNameAsc  = (a, b) => a.name.localeCompare(b.name, 'ja', { sensitivity: 'base' });
-  const byNameDesc = (a, b) => b.name.localeCompare(a.name, 'ja', { sensitivity: 'base' });
-  const debounce   = (fn, ms = 120) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; };
-
-  const thumbHTML = (id, alt) => {
-    const max = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
-    const hq  = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-    return `<img class="thumb" src="${max}" onerror="this.onerror=null;this.src='${hq}'" alt="${escapeHTML(alt)}">`;
-  };
-
-  const iframe = (id) =>
-    `<iframe src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-
-  // 生年月日 → 年齢
-  function calcAge(birthdate, asOf = new Date()) {
-    if (!birthdate) return undefined;
-    const m = String(birthdate).trim().match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
-    if (!m) return undefined;
-    const [_, y, mo, d] = m.map(Number);
-    if (!y || !mo || !d) return undefined;
-
-    const today = new Date(asOf.getFullYear(), asOf.getMonth(), asOf.getDate());
-    const bday  = new Date(y, mo - 1, d);
-    let age = today.getFullYear() - bday.getFullYear();
-    const beforeBirthday = today.getMonth() < bday.getMonth() ||
-                           (today.getMonth() === bday.getMonth() && today.getDate() < d);
-    if (beforeBirthday) age--;
-    return Number.isFinite(age) ? age : undefined;
-  }
 
   /* =========================
    *  Supabase お気に入り
