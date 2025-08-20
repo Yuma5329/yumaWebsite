@@ -5,6 +5,7 @@ import { loadManifest, getList } from "./data/manifest.js";
 import { loadFavorites, initFavorites } from "./data/favorites.js";
 import { buildToolbarOptions, renderList, wireToolbar, wireFavButton } from "./views/list.js";
 import { showDetailBySlug } from "./views/detail.js";
+import { sb } from "./api/supabase.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   // ---- 要素取得 ----
